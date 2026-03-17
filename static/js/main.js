@@ -125,10 +125,9 @@ document.addEventListener("click", function(e) {
   const outcomes = (V[key] || "fff").split("");
 
   const envName = ENV_NAMES[env] || env;
-  const taskName = task.replace(/_/g," ").replace(/\b\w/g, l => l.toUpperCase());
   const policyName = POLICY_NAMES[policy] || policy;
 
-  document.getElementById("vidTitle").textContent = `${policyName}  ·  ${taskName}  ·  ${envName}`;
+  document.getElementById("vidTitle").textContent = `${policyName}  ·  ${envName}`;
 
   const promptKey = `${env}/${task}`;
   const promptText = PROMPTS[promptKey] || "";
