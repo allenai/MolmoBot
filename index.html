@@ -146,20 +146,6 @@
     </figure>
   </section>
 
-  <!-- DATA GENERATION -->
-  <section>
-    <div class="section-label">MolmoBot-Engine</div>
-    <h2>Data Generation Pipeline</h2>
-    <figure>
-      <img src="static/img/datagen_pipeline.png" alt="MolmoBot-Engine data generation pipeline" />
-      <figcaption>
-        <strong>MolmoBot-Engine.</strong> Starting from a pre-built MolmoSpaces house,
-        we sample task-relevant objects, randomize visual and physical parameters (lighting, textures, dynamics,
-        camera pose, joint angles), and iteratively replan until a successful trajectory is found.
-      </figcaption>
-    </figure>
-  </section>
-
   <!-- REAL-WORLD RESULTS -->
   <section>
     <div class="section-label">Key Result</div>
@@ -185,10 +171,10 @@
           <source src="static/videos/camera_demo.mp4" type="video/mp4" />
         </video>
         <p class="demo-caption">
-          MolmoBot policies are highly robust to camera pose variation. Despite never seeing
-          real-world camera configurations during training, the policy successfully executes
-          pick-and-place tasks across a wide range of camera angles and positions — a direct
-          result of the aggressive camera randomization applied during simulated data generation.
+          MolmoBot policies are highly robust to camera pose variation. MolmoBot-Engine
+          employs aggressive camera randomization, requiring resulting policies to learn
+          how to handle a very wide diversity of camera poses. MolmoBot policies are even
+          able to handle adversarial movements of the camera at test time!
         </p>
       </div>
     </div>
@@ -351,9 +337,9 @@
   <!-- MAIN SIM RESULTS TABLE -->
   <section>
     <div class="section-label">Simulation Evaluation</div>
-    <h2>Simulation Results</h2>
+    <h2>DROID Simulation Results</h2>
     <p>
-      Evaluation on simulation held-out environments. Success rates over 200 episodes per task
+      Evaluation on held-out simulation environments. Success rates over 200 episodes per task
       (Pick MSProc: 1000 episodes). All models evaluated <strong>zero-shot</strong> without
       any task-specific fine-tuning.
     </p>
