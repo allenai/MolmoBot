@@ -118,49 +118,6 @@
     </div>
   </section>
 
-  <!-- DATASET STATS -->
-  <section>
-    <div class="section-label">MolmoBot-Data</div>
-    <h2>Dataset at a Glance</h2>
-    <div class="stats-strip">
-      <div class="stat-card"><div class="num">1.8M</div><div class="lbl">Expert Demonstrations</div></div>
-      <div class="stat-card"><div class="num">94k+</div><div class="lbl">Unique Environments</div></div>
-      <div class="stat-card"><div class="num">11k+</div><div class="lbl">Unique Objects</div></div>
-      <div class="stat-card"><div class="num">9k+</div><div class="lbl">Unique Receptacles</div></div>
-      <div class="stat-card"><div class="num">8</div><div class="lbl">Task Types</div></div>
-      <div class="stat-card"><div class="num">5,817 h</div><div class="lbl">Total Data</div></div>
-    </div>
-  </section>
-
-  <!-- SYSTEM OVERVIEW -->
-  <section>
-    <div class="section-label">System Overview</div>
-    <h2>Zero-Shot Sim-to-Real Transfer</h2>
-    <figure>
-      <img src="static/img/teaser.png" alt="MolmoBot teaser figure" class="fig-hero" />
-      <figcaption>
-        MolmoBot leverages diverse simulation data to achieve zero-shot sim-to-real transfer
-        on multiple robotic tasks such as pick-and-place and door opening. This unlocks the ability to dramatically
-        scale up training data for generalist robotic foundation models.
-      </figcaption>
-    </figure>
-  </section>
-
-  <!-- REAL-WORLD RESULTS -->
-  <section>
-    <div class="section-label">Key Result</div>
-    <h2>DROID Real-World Performance</h2>
-    <figure>
-      <img src="static/img/real_results_droid_all.png" alt="Real-world DROID evaluation results bar chart" style="max-width:min(640px, 100%);" />
-      <figcaption>
-        MolmoBot policies exhibit strong zero-shot sim-to-real performance across real-world
-        DROID evaluations, outperforming SOTA policies trained on large-scale real-world demonstrations.
-        Bar heights reflect mean success rate; error bars are 95% confidence intervals via stratified bootstrapping.
-        MolmoBot (F=2) achieves <strong>79.2%</strong> vs. π₀.₅-DROID at 39.2%.
-      </figcaption>
-    </figure>
-  </section>
-
   <!-- QUALITATIVE DEMOS -->
   <section>
     <div class="section-label">Qualitative Demos</div>
@@ -178,6 +135,74 @@
         </p>
       </div>
     </div>
+  </section>
+
+  <!-- SYSTEM OVERVIEW -->
+  <section>
+    <div class="section-label">System Overview</div>
+    <h2>Zero-Shot Sim-to-Real Transfer</h2>
+    <figure>
+      <img src="static/img/teaser.png" alt="MolmoBot teaser figure" class="fig-hero" />
+      <figcaption>
+        MolmoBot leverages diverse simulation data to achieve zero-shot sim-to-real transfer
+        on multiple robotic tasks such as pick-and-place and door opening. This unlocks the ability to dramatically
+        scale up training data for generalist robotic foundation models.
+      </figcaption>
+    </figure>
+  </section>
+
+  <!-- DATASET STATS + MOLMOBOT-DATA -->
+  <section>
+    <div class="section-label">MolmoBot-Engine</div>
+    <h2>Generating Data at Scale</h2>
+    <p>
+      <strong>MolmoBot-Engine</strong> is an open-source procedural data generation pipeline built on
+      <a href="https://github.com/allenai/molmospaces" target="_blank"><strong>MolmoSpaces</strong></a>, a photorealistic simulation platform with 94,000+ indoor environments.
+      It automatically generates expert trajectories via task-and-motion planning with aggressive randomization
+      of objects, lighting, and camera poses — producing <strong>MolmoBot-Data</strong>, 1.8M demonstrations
+      totaling 5,800+ hours of robot experience across 8 task types.
+    </p>
+    <div class="stats-strip">
+      <div class="stat-card"><div class="num">1.8M</div><div class="lbl">Expert Demonstrations</div></div>
+      <div class="stat-card"><div class="num">94k+</div><div class="lbl">Unique Environments</div></div>
+      <div class="stat-card"><div class="num">11k+</div><div class="lbl">Unique Objects</div></div>
+      <div class="stat-card"><div class="num">9k+</div><div class="lbl">Unique Receptacles</div></div>
+      <div class="stat-card"><div class="num">8</div><div class="lbl">Task Types</div></div>
+      <div class="stat-card"><div class="num">5,817 h</div><div class="lbl">Total Data</div></div>
+    </div>
+    <div class="demo-list" style="margin-top: 32px;">
+      <div class="demo-card">
+        <video controls muted loop playsinline>
+          <source src="static/videos/molmobot-data.mp4" type="video/mp4" />
+        </video>
+        <p class="demo-caption">
+          MolmoBot-Engine procedurally generates diverse pick-and-place demonstrations across thousands of
+          simulated environments. Randomization of object placement, lighting, and camera pose drives the
+          sim-to-real transfer capability of the resulting policies.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- REAL-WORLD RESULTS -->
+  <section>
+    <div class="section-label">Key Result</div>
+    <h2>DROID Real-World Performance</h2>
+    <p>
+      We evaluate our policies zero-shot on a real DROID robot across four distinct environments —
+      Workroom, Kitchen, Bedroom, and Office — covering 40 pick-and-place tasks with varied objects and
+      receptacles (120 episodes total). <strong>No real-world data or task-specific fine-tuning is used.</strong>
+      MolmoBot (F=2) achieves <strong>79.2%</strong> overall success, more than doubling the performance of
+      π₀.₅-DROID (39.2%), a strong baseline trained on large-scale real-world demonstrations.
+    </p>
+    <figure>
+      <img src="static/img/real_results_droid_all.png" alt="Real-world DROID evaluation results bar chart" style="max-width:min(640px, 100%);" />
+      <figcaption>
+        MolmoBot policies exhibit strong zero-shot sim-to-real performance across real-world
+        DROID evaluations, outperforming SOTA policies trained on large-scale real-world demonstrations.
+        Bar heights reflect mean success rate; error bars are 95% confidence intervals via stratified bootstrapping.
+      </figcaption>
+    </figure>
   </section>
 
   <!-- DROID PER-TASK TABLE -->
