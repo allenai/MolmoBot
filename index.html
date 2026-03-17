@@ -1,0 +1,779 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MolmoBot: Large-Scale Simulation Enables Zero-Shot Manipulation</title>
+  <style>
+    :root {
+      --pink: #e8529a;
+      --pink-light: #f5a8d0;
+      --pink-dark: #c03a7a;
+      --bg: #ffffff;
+      --surface: #fafafa;
+      --border: #e8e8e8;
+      --text: #1a1a1a;
+      --text-secondary: #555;
+      --max-width: 960px;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+    }
+
+    /* ── TOP STRIPE ── */
+    .top-stripe {
+      background: var(--pink);
+      height: 4px;
+    }
+
+    /* ── HEADER ── */
+    header {
+      background: var(--bg);
+      padding: 48px 24px 32px;
+      text-align: center;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .title-row {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 18px;
+      flex-wrap: wrap;
+    }
+
+    .logo {
+      width: 72px;
+      height: 72px;
+      flex-shrink: 0;
+    }
+
+    h1 {
+      font-size: clamp(1.6rem, 4vw, 2.5rem);
+      font-weight: 800;
+      line-height: 1.2;
+      text-align: left;
+      max-width: 700px;
+    }
+
+    h1 .highlight { color: var(--pink); }
+
+    .venue-badge {
+      display: inline-block;
+      margin-top: 12px;
+      background: var(--pink);
+      color: white;
+      font-size: 0.78rem;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+      padding: 4px 14px;
+      border-radius: 999px;
+    }
+
+    /* ── AUTHORS ── */
+    .authors-section {
+      max-width: var(--max-width);
+      margin: 0 auto;
+      padding: 24px 24px 0;
+      text-align: center;
+    }
+
+    .authors-toggle {
+      background: none;
+      border: 1.5px solid var(--pink);
+      color: var(--pink);
+      padding: 6px 20px;
+      border-radius: 999px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.15s, color 0.15s;
+    }
+    .authors-toggle:hover { background: var(--pink); color: white; }
+
+    .authors-block {
+      display: none;
+      margin-top: 16px;
+      font-size: 0.88rem;
+      color: var(--text-secondary);
+      line-height: 1.9;
+    }
+    .authors-block.open { display: block; }
+
+    .authors-block .costar {
+      font-weight: 700;
+      color: var(--text);
+    }
+    .authors-block sup { font-size: 0.65em; }
+
+    .affiliations {
+      margin-top: 8px;
+      font-size: 0.8rem;
+      color: #888;
+    }
+
+    .contrib-note {
+      margin-top: 6px;
+      font-size: 0.78rem;
+      color: #aaa;
+      font-style: italic;
+    }
+
+    /* ── LINKS ── */
+    .links {
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 10px;
+      padding: 24px 24px 0;
+    }
+
+    .link-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 20px;
+      border-radius: 8px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      text-decoration: none;
+      transition: opacity 0.15s, transform 0.1s;
+      border: 1.5px solid transparent;
+    }
+    .link-btn:hover { opacity: 0.85; transform: translateY(-1px); }
+
+    .link-btn.primary   { background: var(--pink); color: white; }
+    .link-btn.secondary { background: var(--text); color: white; }
+    .link-btn.outline   { border-color: var(--border); color: var(--text); background: var(--bg); }
+
+    /* ── MAIN ── */
+    main {
+      max-width: var(--max-width);
+      margin: 0 auto;
+      padding: 0 24px 80px;
+    }
+
+    section { margin-top: 60px; }
+
+    h2 {
+      font-size: 1.45rem;
+      font-weight: 800;
+      border-left: 4px solid var(--pink);
+      padding-left: 12px;
+      margin-bottom: 20px;
+    }
+
+    h3 {
+      font-size: 1.05rem;
+      font-weight: 700;
+      margin: 24px 0 10px;
+      color: var(--pink-dark);
+    }
+
+    p { margin-bottom: 12px; color: var(--text-secondary); }
+    p strong { color: var(--text); }
+
+    /* ── ABSTRACT ── */
+    .abstract-box {
+      background: #fff8fb;
+      border: 1.5px solid var(--pink-light);
+      border-radius: 12px;
+      padding: 28px 32px;
+      font-size: 0.95rem;
+      line-height: 1.75;
+      color: var(--text);
+    }
+    .abstract-box p { color: var(--text); margin: 0; }
+
+    /* ── FIGURES ── */
+    figure {
+      margin: 0;
+      text-align: center;
+    }
+
+    figure img {
+      max-width: 100%;
+      height: auto;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+    }
+
+    figcaption {
+      margin-top: 10px;
+      font-size: 0.82rem;
+      color: #888;
+      line-height: 1.5;
+      max-width: 800px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+    figcaption strong { color: var(--text); }
+
+    .fig-hero { margin-bottom: 8px; }
+
+    /* ── ENV GRID ── */
+    .env-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 8px;
+      margin-bottom: 10px;
+    }
+    .env-grid img {
+      width: 100%;
+      height: 130px;
+      object-fit: cover;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+    }
+
+    /* ── TABLES ── */
+    .table-wrap {
+      overflow-x: auto;
+      margin-top: 10px;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.83rem;
+    }
+
+    thead tr {
+      background: var(--pink);
+      color: white;
+    }
+
+    thead th {
+      padding: 10px 12px;
+      font-weight: 700;
+      text-align: center;
+      white-space: nowrap;
+    }
+    thead th:first-child { text-align: left; }
+
+
+    tbody td {
+      padding: 8px 12px;
+      text-align: center;
+      border-bottom: 1px solid var(--border);
+      color: var(--text-secondary);
+      white-space: nowrap;
+    }
+    tbody td:first-child { text-align: left; color: var(--text); font-weight: 500; }
+
+    .separator-row td {
+      padding: 0;
+      height: 2px;
+      background: var(--border);
+    }
+
+    tbody tr.ours { background: #fff0f7 !important; }
+    tbody tr.ours td { color: var(--text); }
+    tbody .best { font-weight: 800; color: var(--pink-dark); }
+
+    .table-caption {
+      font-size: 0.82rem;
+      color: #888;
+      margin-top: 8px;
+      line-height: 1.5;
+    }
+    .table-caption strong { color: var(--text); }
+
+    /* ── SUB-SECTION LABEL ── */
+    .section-label {
+      display: block;
+      font-size: 0.7rem;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--pink);
+      margin-bottom: 6px;
+    }
+
+    /* ── STATS STRIP ── */
+    .stats-strip {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+      gap: 12px;
+      margin-top: 12px;
+    }
+    .stat-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 16px 12px;
+      text-align: center;
+    }
+    .stat-card .num {
+      font-size: 1.5rem;
+      font-weight: 800;
+      color: var(--pink);
+    }
+    .stat-card .lbl {
+      font-size: 0.75rem;
+      color: var(--text-secondary);
+      margin-top: 2px;
+    }
+
+    /* ── DEMOS ── */
+    .demo-list {
+      display: flex;
+      flex-direction: column;
+      gap: 40px;
+    }
+
+    .demo-card {
+      text-align: center;
+    }
+
+    .demo-card video {
+      width: 100%;
+      max-width: 720px;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      display: block;
+      margin: 0 auto;
+    }
+
+    .demo-caption {
+      margin-top: 10px;
+      font-size: 0.82rem;
+      color: #888;
+      line-height: 1.55;
+      margin-bottom: 0;
+      max-width: 720px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    /* ── FOOTER ── */
+    footer {
+      text-align: center;
+      padding: 32px 24px;
+      font-size: 0.8rem;
+      color: #bbb;
+      border-top: 1px solid var(--border);
+    }
+    footer a { color: var(--pink); text-decoration: none; }
+
+    @media (max-width: 600px) {
+      .env-grid { grid-template-columns: repeat(2, 1fr); }
+      h1 { font-size: 1.5rem; }
+      .logo { width: 52px; height: 52px; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="top-stripe"></div>
+
+<!-- HEADER -->
+<header>
+  <div class="title-row">
+    <img src="static/img/MolmoBotLogo.png" alt="MolmoBot logo" class="logo" />
+    <div>
+      <h1><span class="highlight">MolmoBot</span>: Large-Scale Simulation<br>Enables Zero-Shot Manipulation</h1>
+    </div>
+  </div>
+  <div style="margin-top:14px;">
+    <span class="venue-badge">Preprint 2025 · Allen Institute for AI</span>
+  </div>
+</header>
+
+<!-- AUTHORS -->
+<div class="authors-section">
+  <button class="authors-toggle" onclick="toggleAuthors()">&#9660; Show Authors</button>
+
+  <div class="authors-block" id="authorBlock">
+    <div>
+      <span class="costar">Abhay Deshpande<sup>♥1*</sup></span>,&nbsp;
+      <span class="costar">Maya Guru<sup>♥1*</sup></span>,&nbsp;
+      <span class="costar">Rose Hendrix<sup>♥1*</sup></span>,&nbsp;
+      <span class="costar">Snehal Jauhri<sup>♥1,4*</sup></span>
+    </div>
+    <div>
+      Ainaz Eftekhar<sup>♥1,2</sup>, Rohun Tripathi<sup>♥1</sup>, Max Argus<sup>♥1</sup>,
+      Jordi Salvador<sup>♥1</sup>, Haoquan Fang<sup>♥1,2</sup>, Matthew Wallingford<sup>♥1</sup>,
+      Wilbert Pumacay<sup>♥1</sup>, Yejin Kim<sup>♥1</sup>
+    </div>
+    <div>
+      Quinn Pfeifer<sup>2</sup>, Ying-Chun Lee<sup>2</sup>, Piper Wolters<sup>1</sup>,
+      Omar Rayyan<sup>3</sup>, Mingtong Zhang<sup>5</sup>, Jiafei Duan<sup>1,2</sup>,
+      Karen Farley<sup>1</sup>, Winson Han<sup>1</sup>, Eli Vanderbilt<sup>1</sup>
+    </div>
+    <div>
+      Dieter Fox<sup>1,2</sup>, Ali Farhadi<sup>1,2</sup>, Georgia Chalvatzaki<sup>1</sup>
+    </div>
+    <div>
+      <strong>Dhruv Shah<sup>♥5</sup></strong>, <strong>Ranjay Krishna<sup>†1,2</sup></strong>
+    </div>
+    <div class="affiliations">
+      <sup>1</sup>Allen Institute for AI &nbsp;·&nbsp;
+      <sup>2</sup>University of Washington &nbsp;·&nbsp;
+      <sup>3</sup>UC Los Angeles &nbsp;·&nbsp;
+      <sup>4</sup>Technische Universität Darmstadt &nbsp;·&nbsp;
+      <sup>5</sup>Princeton University
+    </div>
+    <div class="contrib-note">
+      * Equal contribution (alphabetical) &nbsp;·&nbsp; ♥ Core contributors &nbsp;·&nbsp; † Equal advising
+    </div>
+  </div>
+</div>
+
+<!-- LINKS -->
+<div class="links">
+  <a href="resources/paper.pdf" class="link-btn primary">
+    <svg width="14" height="14" fill="currentColor" viewBox="0 0 16 16"><path d="M5.5 7a.5.5 0 0 0 0 1h5a.5.5 0 0 0 0-1h-5zm0-2a.5.5 0 0 0 0 1h5a.5.5 0 0 0 0-1h-5zM14 0H2a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V2a2 2 0 0 0-2-2zm-1 13H3V3h10v10z"/></svg>
+    Paper
+  </a>
+  <a href="https://allenai.org/blog/molmobot-robot-manipulation" class="link-btn secondary" target="_blank">
+    <svg width="14" height="14" fill="currentColor" viewBox="0 0 16 16"><path d="M0 2a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V2zm5.854 8.803a.5.5 0 1 0-.708-.707L3 12.243V10.5a.5.5 0 0 0-1 0v3a.5.5 0 0 0 .5.5h3a.5.5 0 0 0 0-1H3.757l2.097-2.097zm4.292-7.606a.5.5 0 1 0 .708.707L13 1.757V3.5a.5.5 0 0 0 1 0v-3a.5.5 0 0 0-.5-.5h-3a.5.5 0 0 0 0 1h1.743L10.146 3.197z"/></svg>
+    Blog
+  </a>
+  <a href="https://github.com/allenai/MolmoBot" class="link-btn outline" target="_blank">
+    <svg width="14" height="14" fill="currentColor" viewBox="0 0 16 16"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.012 8.012 0 0 0 16 8c0-4.42-3.58-8-8-8z"/></svg>
+    Code
+  </a>
+  <a href="https://huggingface.co/datasets/allenai/MolmoBot-Data" class="link-btn outline" target="_blank">
+    <svg width="14" height="14" fill="currentColor" viewBox="0 0 16 16"><path d="M8 1a7 7 0 1 0 0 14A7 7 0 0 0 8 1zm0 1a6 6 0 1 1 0 12A6 6 0 0 1 8 2zm0 2a4 4 0 1 0 0 8 4 4 0 0 0 0-8zm0 1a3 3 0 1 1 0 6 3 3 0 0 1 0-6z"/></svg>
+    Dataset
+  </a>
+</div>
+
+<!-- MAIN CONTENT -->
+<main>
+
+  <!-- ABSTRACT -->
+  <section>
+    <h2>Abstract</h2>
+    <div class="abstract-box">
+      <p>
+        A prevailing view in robot learning is that simulation alone is not enough; effective sim-to-real transfer
+        is widely believed to require at least some real-world data collection or task-specific fine-tuning to
+        bridge the gap between simulated and physical environments. <strong>We challenge that assumption.</strong>
+        With sufficiently large-scale and diverse simulated synthetic training data, we show that zero-shot transfer
+        to the real world is not only possible, but effective for both static and mobile manipulation.
+      </p>
+      <p style="margin-top:12px;">
+        We introduce <strong>MolmoBot-Engine</strong>, a fully open-source pipeline for procedural data generation
+        across robots, tasks, and diverse simulated environments in MolmoSpaces. With it, we release
+        <strong>MolmoBot-Data</strong>, a dataset of 1.8 million expert trajectories for articulated object
+        manipulation and pick-and-place tasks. We train three policy classes: <strong>MolmoBot</strong>
+        (a Molmo2-based VLM with a flow-matching action head), <strong>MolmoBot-Pi0</strong> (replicating the
+        π₀ architecture for controlled comparison), and <strong>MolmoBot-SPOC</strong> (a lightweight policy
+        for edge deployment). Without any real-world fine-tuning, our policies achieve zero-shot transfer to
+        unseen objects and environments, reaching <strong>79.2% success rate</strong> on real-world tabletop
+        pick-and-place, outperforming π₀.₅ at 39.2%.
+      </p>
+    </div>
+  </section>
+
+  <!-- DATASET STATS -->
+  <section>
+    <div class="section-label">MolmoBot-Data</div>
+    <h2>Dataset at a Glance</h2>
+    <div class="stats-strip">
+      <div class="stat-card"><div class="num">1.8M</div><div class="lbl">Expert Demonstrations</div></div>
+      <div class="stat-card"><div class="num">94k+</div><div class="lbl">Unique Environments</div></div>
+      <div class="stat-card"><div class="num">11k+</div><div class="lbl">Unique Objects</div></div>
+      <div class="stat-card"><div class="num">9k+</div><div class="lbl">Unique Receptacles</div></div>
+      <div class="stat-card"><div class="num">8</div><div class="lbl">Task Types</div></div>
+      <div class="stat-card"><div class="num">5,817 h</div><div class="lbl">Total Data</div></div>
+    </div>
+  </section>
+
+  <!-- SYSTEM OVERVIEW -->
+  <section>
+    <div class="section-label">System Overview</div>
+    <h2>Zero-Shot Sim-to-Real Transfer</h2>
+    <figure>
+      <img src="static/img/teaser.png" alt="MolmoBot teaser figure" class="fig-hero" />
+      <figcaption>
+        MolmoBot leverages diverse simulation data to achieve zero-shot sim-to-real transfer
+        on multiple robotic tasks such as pick-and-place and door opening. This unlocks the ability to dramatically
+        scale up training data for generalist robotic foundation models.
+      </figcaption>
+    </figure>
+  </section>
+
+  <!-- DATA GENERATION -->
+  <section>
+    <div class="section-label">MolmoBot-Engine</div>
+    <h2>Data Generation Pipeline</h2>
+    <figure>
+      <img src="static/img/datagen_pipeline.png" alt="MolmoBot-Engine data generation pipeline" />
+      <figcaption>
+        <strong>MolmoBot-Engine.</strong> Starting from a pre-built MolmoSpaces house,
+        we sample task-relevant objects, randomize visual and physical parameters (lighting, textures, dynamics,
+        camera pose, joint angles), and iteratively replan until a successful trajectory is found.
+      </figcaption>
+    </figure>
+  </section>
+
+  <!-- REAL-WORLD RESULTS -->
+  <section>
+    <div class="section-label">Key Result</div>
+    <h2>Real-World Performance</h2>
+    <figure>
+      <img src="static/img/real_results_droid_all.png" alt="Real-world DROID evaluation results bar chart" style="max-width:640px;" />
+      <figcaption>
+        MolmoBot policies exhibit strong zero-shot sim-to-real performance across real-world
+        DROID evaluations, outperforming SOTA policies trained on large-scale real-world demonstrations.
+        Bar heights reflect mean success rate; error bars are 95% confidence intervals via stratified bootstrapping.
+        MolmoBot (F=2) achieves <strong>79.2%</strong> vs. π₀.₅-DROID at 39.2%.
+      </figcaption>
+    </figure>
+  </section>
+
+  <!-- QUALITATIVE DEMOS -->
+  <section>
+    <div class="section-label">Qualitative Demos</div>
+    <h2>Video Demos</h2>
+    <div class="demo-list">
+      <div class="demo-card">
+        <video controls muted loop playsinline>
+          <source src="static/videos/camera_demo.mp4" type="video/mp4" />
+        </video>
+        <p class="demo-caption">
+          MolmoBot policies are highly robust to camera pose variation. Despite never seeing
+          real-world camera configurations during training, the policy successfully executes
+          pick-and-place tasks across a wide range of camera angles and positions — a direct
+          result of the aggressive camera randomization applied during simulated data generation.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- MAIN SIM RESULTS TABLE -->
+  <section>
+    <div class="section-label">Simulation Evaluation</div>
+    <h2>Simulation Results</h2>
+    <p>
+      Evaluation on simulation held-out environments. Success rates over 200 episodes per task
+      (Pick MSProc: 1000 episodes). All models evaluated <strong>zero-shot</strong> without
+      any task-specific fine-tuning.
+    </p>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Model</th>
+            <th>Pick MSProc</th>
+            <th>Pick Classic</th>
+            <th>Pick</th>
+            <th>Pick Rand-Cam</th>
+            <th>Pick&amp;Place</th>
+            <th>PnP Next-To</th>
+            <th>PnP Color</th>
+            <th>Avg.</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>π₀.₅</td>
+            <td>36.4</td><td>9.3</td><td>14.0</td><td>12.8</td>
+            <td>20.0</td><td>35.5</td><td>16.2</td><td>20.6</td>
+          </tr>
+          <tr>
+            <td>π₀.₅-Finetune</td>
+            <td>47.0</td><td>20.5</td><td>24.0</td><td>28.5</td>
+            <td>46.0</td><td>36.9</td><td>53.0</td><td>36.6</td>
+          </tr>
+          <tr>
+            <td>StereoVLA</td>
+            <td>6.3</td><td>4.3</td><td>1.1</td><td>N/A</td>
+            <td>0</td><td>0</td><td>0</td><td>—</td>
+          </tr>
+          <tr>
+            <td>LAP-VLA</td>
+            <td>12.6</td><td>0.5</td><td>0.5</td><td>0</td>
+            <td>2.2</td><td>10.1</td><td>0</td><td>3.7</td>
+          </tr>
+          <tr>
+            <td>X-VLA</td>
+            <td>6.0</td><td>5.8</td><td>0.9</td><td>0.2</td>
+            <td>0</td><td>0</td><td>0</td><td>1.8</td>
+          </tr>
+          <tr class="separator-row"><td colspan="9"></td></tr>
+          <tr class="ours">
+            <td>MolmoBot-Pi0</td>
+            <td>65.5</td><td>30.5</td><td>32.0</td><td>36.0</td>
+            <td>41.5</td><td>41.8</td><td>42.5</td><td>41.4</td>
+          </tr>
+          <tr class="ours">
+            <td>MolmoBot-Img</td>
+            <td class="best">92.8</td><td class="best">67.0</td><td>63.0</td><td class="best">62.5</td>
+            <td class="best">67.0</td><td>47.5</td><td>65.0</td><td class="best">66.4</td>
+          </tr>
+          <tr class="ours">
+            <td><strong>MolmoBot (F=2)</strong></td>
+            <td>92.0</td><td>63.0</td><td class="best">66.0</td><td>61.0</td>
+            <td>60.0</td><td class="best">55.0</td><td class="best">68.0</td><td class="best">66.4</td>
+          </tr>
+          <tr class="ours">
+            <td>MolmoBot (F=3)</td>
+            <td>91.9</td><td>61.0</td><td>63.5</td><td>60.0</td>
+            <td>62.5</td><td>46.5</td><td>65.5</td><td>64.4</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="table-caption">
+      <strong>Pink rows</strong> are our models. Bold values are best per column.
+      MolmoBot variants substantially outperform all baselines, with MolmoBot-Img and MolmoBot (F=2)
+      both achieving <strong>66.4% average</strong> vs. 36.6% for the strongest baseline (π₀.₅-Finetune).
+    </p>
+  </section>
+
+  <!-- DROID PER-TASK TABLE -->
+  <section>
+    <div class="section-label">Per-Task Breakdown</div>
+    <h2>DROID Real-World Results by Environment</h2>
+    <p>Each cell shows successes out of 3 trials per task. 4 environments × 10 tasks × 3 trials = 120 total episodes per policy.</p>
+
+    <h3>Workroom</h3>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Policy</th>
+            <th>Spoon Tray</th><th>Spoon Box</th><th>Tape Tray</th><th>Tape Box</th>
+            <th>Blue Mug Tray</th><th>Blue Mug Box</th><th>Copper Mug Tray</th><th>Copper Mug Box</th>
+            <th>Timer Tray</th><th>Timer Box</th><th>Avg</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr class="ours"><td><strong>MolmoBot</strong></td><td>3/3</td><td>2/3</td><td>3/3</td><td>3/3</td><td>3/3</td><td>3/3</td><td>3/3</td><td>1/3</td><td>3/3</td><td>3/3</td><td class="best">90%</td></tr>
+          <tr class="ours"><td>MolmoBot-Img</td><td>3/3</td><td>3/3</td><td>3/3</td><td>3/3</td><td>3/3</td><td>2/3</td><td>2/3</td><td>0/3</td><td>3/3</td><td>1/3</td><td>77%</td></tr>
+          <tr class="ours"><td>MolmoBot-Pi0</td><td>1/3</td><td>0/3</td><td>3/3</td><td>3/3</td><td>3/3</td><td>3/3</td><td>2/3</td><td>1/3</td><td>0/3</td><td>2/3</td><td>60%</td></tr>
+          <tr><td>π₀.₅</td><td>2/3</td><td>2/3</td><td>2/3</td><td>0/3</td><td>1/3</td><td>1/3</td><td>0/3</td><td>0/3</td><td>0/3</td><td>0/3</td><td>27%</td></tr>
+          <tr><td>π₀</td><td>0/3</td><td>0/3</td><td>1/3</td><td>0/3</td><td>0/3</td><td>0/3</td><td>0/3</td><td>0/3</td><td>0/3</td><td>0/3</td><td>3%</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>Kitchen</h3>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Policy</th>
+            <th>Apple Easy</th><th>Apple Hard</th><th>Mug Easy</th><th>Mug Hard</th>
+            <th>Banana Easy</th><th>Banana Hard</th><th>Mouse Easy</th><th>Mouse Hard</th>
+            <th>Clutter Brown</th><th>Clutter Black</th><th>Avg</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr class="ours"><td><strong>MolmoBot</strong></td><td>1/3</td><td>2/3</td><td>3/3</td><td>3/3</td><td>3/3</td><td>3/3</td><td>3/3</td><td>3/3</td><td>0/3</td><td>0/3</td><td>70%</td></tr>
+          <tr class="ours"><td>MolmoBot-Img</td><td>3/3</td><td>3/3</td><td>2/3</td><td>3/3</td><td>3/3</td><td>3/3</td><td>3/3</td><td>2/3</td><td>3/3</td><td>1/3</td><td class="best">87%</td></tr>
+          <tr class="ours"><td>MolmoBot-Pi0</td><td>2/3</td><td>3/3</td><td>2/3</td><td>0/3</td><td>3/3</td><td>1/3</td><td>3/3</td><td>2/3</td><td>0/3</td><td>0/3</td><td>53%</td></tr>
+          <tr><td>π₀.₅</td><td>3/3</td><td>0/3</td><td>2/3</td><td>1/3</td><td>3/3</td><td>2/3</td><td>3/3</td><td>1/3</td><td>2/3</td><td>2/3</td><td>63%</td></tr>
+          <tr><td>π₀</td><td>0/3</td><td>1/3</td><td>0/3</td><td>0/3</td><td>1/3</td><td>0/3</td><td>3/3</td><td>1/3</td><td>0/3</td><td>0/3</td><td>20%</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>Bedroom</h3>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Policy</th>
+            <th>Pills Towel</th><th>Pills Basket</th><th>Roller Towel</th><th>Roller Basket</th>
+            <th>Banana Towel</th><th>Banana Basket</th><th>Ball Towel</th><th>Ball Basket</th>
+            <th>Clutter Towel</th><th>Clutter Basket</th><th>Avg</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr class="ours"><td><strong>MolmoBot</strong></td><td>3/3</td><td>3/3</td><td>3/3</td><td>0/3</td><td>3/3</td><td>2/3</td><td>3/3</td><td>3/3</td><td>3/3</td><td>3/3</td><td class="best">87%</td></tr>
+          <tr class="ours"><td>MolmoBot-Img</td><td>0/3</td><td>0/3</td><td>1/3</td><td>2/3</td><td>3/3</td><td>3/3</td><td>3/3</td><td>2/3</td><td>3/3</td><td>3/3</td><td>67%</td></tr>
+          <tr class="ours"><td>MolmoBot-Pi0</td><td>2/3</td><td>0/3</td><td>2/3</td><td>0/3</td><td>0/3</td><td>0/3</td><td>1/3</td><td>0/3</td><td>0/3</td><td>2/3</td><td>23%</td></tr>
+          <tr><td>π₀.₅</td><td>0/3</td><td>0/3</td><td>0/3</td><td>0/3</td><td>1/3</td><td>0/3</td><td>0/3</td><td>0/3</td><td>2/3</td><td>0/3</td><td>10%</td></tr>
+          <tr><td>π₀</td><td>0/3</td><td>0/3</td><td>0/3</td><td>0/3</td><td>0/3</td><td>0/3</td><td>0/3</td><td>0/3</td><td>0/3</td><td>0/3</td><td>0%</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>Office</h3>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Policy</th>
+            <th>Knife Board</th><th>Banana Plate</th><th>Marker Mug</th><th>Scissors Bowl</th>
+            <th>Carrot Basket</th><th>Knife Green Bowl</th><th>Screwdriver Blue Bowl</th><th>Mouse Blue Bowl</th>
+            <th>Mug Bowl</th><th>Marker Box</th><th>Avg</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr class="ours"><td><strong>MolmoBot</strong></td><td>2/3</td><td>3/3</td><td>1/3</td><td>2/3</td><td>2/3</td><td>2/3</td><td>3/3</td><td>2/3</td><td>3/3</td><td>1/3</td><td class="best">70%</td></tr>
+          <tr class="ours"><td>MolmoBot-Img</td><td>2/3</td><td>1/3</td><td>0/3</td><td>1/3</td><td>3/3</td><td>1/3</td><td>3/3</td><td>2/3</td><td>3/3</td><td>2/3</td><td>60%</td></tr>
+          <tr class="ours"><td>MolmoBot-Pi0</td><td>1/3</td><td>3/3</td><td>0/3</td><td>0/3</td><td>0/3</td><td>1/3</td><td>3/3</td><td>2/3</td><td>3/3</td><td>2/3</td><td>50%</td></tr>
+          <tr><td>π₀.₅</td><td>2/3</td><td>3/3</td><td>1/3</td><td>1/3</td><td>1/3</td><td>1/3</td><td>2/3</td><td>1/3</td><td>3/3</td><td>2/3</td><td>57%</td></tr>
+          <tr><td>π₀</td><td>0/3</td><td>0/3</td><td>0/3</td><td>0/3</td><td>1/3</td><td>1/3</td><td>1/3</td><td>1/3</td><td>0/3</td><td>0/3</td><td>13%</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="table-caption">
+      <strong>Pink rows</strong> are our models. Per-task breakdown of DROID real-world evaluation (3 trials each).
+    </p>
+  </section>
+
+  <!-- RB-Y1 SIM RESULTS -->
+  <section>
+    <div class="section-label">Mobile Manipulation</div>
+    <h2>RB-Y1 Simulation Results (Table 8)</h2>
+    <p>Zero-shot simulation evaluation for RB-Y1 policies on held-out environments.</p>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Model</th>
+            <th>Pick</th>
+            <th>Pick &amp; Place</th>
+            <th>Open</th>
+            <th>Door Open</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr class="ours"><td><strong>MolmoBot Multitask</strong></td><td class="best">44.8%</td><td class="best">22.5%</td><td class="best">25.2%</td><td>70.2%</td></tr>
+          <tr class="ours"><td>MolmoBot Door Specialist</td><td>—</td><td>—</td><td>—</td><td class="best">77.7%</td></tr>
+          <tr class="ours"><td>MolmoBot-SPOC Rigid</td><td>10.5%</td><td>1.8%</td><td>—</td><td>—</td></tr>
+          <tr class="ours"><td>MolmoBot-SPOC Articulated</td><td>—</td><td>—</td><td>21.8%</td><td>58.8%</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="table-caption">
+      MolmoBot Multitask outperforms MolmoBot-SPOC across all shared tasks.
+      The MolmoBot Door Specialist achieves 77.7% zero-shot door-opening success in simulation.
+    </p>
+  </section>
+
+</main>
+
+<footer>
+  <img src="static/img/ai2_logo.png" alt="Allen Institute for AI" style="height:28px; margin-bottom:8px; display:block; margin-left:auto; margin-right:auto;" />
+  MolmoBot · Allen Institute for AI · 2025 ·
+  <a href="resources/paper.pdf">Paper</a> ·
+  <a href="https://allenai.org/blog/molmobot-robot-manipulation" target="_blank">Blog</a>
+</footer>
+
+<script>
+  function toggleAuthors() {
+    const block = document.getElementById('authorBlock');
+    const btn = document.querySelector('.authors-toggle');
+    block.classList.toggle('open');
+    btn.textContent = block.classList.contains('open') ? '▲ Hide Authors' : '▼ Show Authors';
+  }
+</script>
+
+</body>
+</html>
