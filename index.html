@@ -122,17 +122,35 @@
   <section>
     <div class="section-label">Qualitative Demos</div>
     <h2>Video Demos</h2>
-    <div class="demo-list">
-      <div class="demo-card">
-        <video controls muted loop playsinline>
-          <source src="static/videos/camera_demo.mp4" type="video/mp4" />
-        </video>
-        <p class="demo-caption">
-          MolmoBot policies are highly robust to camera pose variation. MolmoBot-Engine
-          employs aggressive camera randomization, requiring resulting policies to learn
-          how to handle a very wide diversity of camera poses. MolmoBot policies are even
-          able to handle adversarial movements of the camera at test time!
-        </p>
+    <div class="carousel">
+      <div class="carousel-track">
+        <div class="carousel-slide">
+          <video controls muted loop playsinline>
+            <source src="static/videos/camera_demo.mp4" type="video/mp4" />
+          </video>
+          <p class="demo-caption">
+            MolmoBot policies are highly robust to camera pose variation. MolmoBot-Engine
+            employs aggressive camera randomization, requiring resulting policies to learn
+            how to handle a very wide diversity of camera poses. MolmoBot policies are even
+            able to handle adversarial movements of the camera at test time!
+          </p>
+        </div>
+        <div class="carousel-slide">
+          <video controls muted loop playsinline>
+            <source src="static/videos/steerability_demo.mp4" type="video/mp4" />
+          </video>
+          <p class="demo-caption">
+            Owing to the high degree of diversity and randomization in MolmoBot-Data, MolmoBot policies
+            are robust to disturbances and highly steerable. SOTA VLAs are often attracted to nearby
+            objects or receptacles, ignoring the task prompt, but MolmoBot policies strongly attend
+            to the task instruction.
+          </p>
+        </div>
+      </div>
+      <div class="carousel-controls">
+        <button class="carousel-btn" id="carouselPrev" onclick="carouselMove(-1)" aria-label="Previous">&#8592;</button>
+        <div class="carousel-dots" id="carouselDots"></div>
+        <button class="carousel-btn" id="carouselNext" onclick="carouselMove(1)" aria-label="Next">&#8594;</button>
       </div>
     </div>
   </section>

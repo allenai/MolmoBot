@@ -325,6 +325,76 @@ tbody .best { font-weight: 800; color: var(--pink-dark); }
   margin-top: 2px;
 }
 
+/* ── CAROUSEL ── */
+.carousel {
+  position: relative;
+  overflow: hidden;
+  width: 100%;
+}
+
+.carousel-track {
+  display: flex;
+  width: 100%;
+  transition: transform 0.4s ease;
+}
+
+.carousel-slide {
+  min-width: 100%;
+  max-width: 100%;
+  flex-shrink: 0;
+  text-align: center;
+  box-sizing: border-box;
+}
+
+.carousel-slide video {
+  width: 100%;
+  max-width: 720px;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  display: block;
+  margin: 0 auto;
+}
+
+.carousel-controls {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  margin-top: 16px;
+}
+
+.carousel-btn {
+  background: none;
+  border: 1.5px solid var(--border);
+  border-radius: 8px;
+  width: 36px;
+  height: 36px;
+  font-size: 1.1rem;
+  cursor: pointer;
+  color: var(--text);
+  transition: background 0.15s, border-color 0.15s;
+  line-height: 1;
+}
+.carousel-btn:hover { background: var(--pink); border-color: var(--pink); color: white; }
+.carousel-btn:disabled { opacity: 0.3; cursor: default; }
+
+.carousel-dots {
+  display: flex;
+  gap: 8px;
+}
+
+.carousel-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--border);
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  transition: background 0.2s;
+}
+.carousel-dot.active { background: var(--pink); }
+
 /* ── DEMOS ── */
 .demo-list {
   display: flex;

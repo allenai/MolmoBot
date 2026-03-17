@@ -1,3 +1,34 @@
+// ── Carousel ──────────────────────────────────────────────────────
+(function() {
+  const track = document.querySelector('.carousel-track');
+  if (!track) return;
+  const slides = track.querySelectorAll('.carousel-slide');
+  const dotsContainer = document.getElementById('carouselDots');
+  let current = 0;
+
+  slides.forEach((_, i) => {
+    const dot = document.createElement('button');
+    dot.className = 'carousel-dot' + (i === 0 ? ' active' : '');
+    dot.setAttribute('aria-label', `Slide ${i + 1}`);
+    dot.addEventListener('click', () => goTo(i));
+    dotsContainer.appendChild(dot);
+  });
+
+  function goTo(idx) {
+    slides[current].querySelector('video')?.pause();
+    current = idx;
+    track.style.transform = `translateX(-${current * 100}%)`;
+    dotsContainer.querySelectorAll('.carousel-dot').forEach((d, i) =>
+      d.classList.toggle('active', i === current)
+    );
+    document.getElementById('carouselPrev').disabled = current === 0;
+    document.getElementById('carouselNext').disabled = current === slides.length - 1;
+  }
+
+  goTo(0);
+  window.carouselMove = (dir) => goTo(Math.max(0, Math.min(slides.length - 1, current + dir)));
+})();
+
 function toggleAuthors() {
   const block = document.getElementById('authorBlock');
   const btn = document.querySelector('.authors-toggle');
