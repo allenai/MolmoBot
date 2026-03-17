@@ -3,6 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="icon" type="image/png" sizes="32x32" href="static/img/MolmoBotLogo_favicon_32.png" />
   <title>MolmoBot: Large-Scale Simulation Enables Zero-Shot Manipulation</title>
   <style>
     :root {
@@ -49,7 +50,7 @@
     }
 
     .logo {
-      width: 72px;
+      /* width: 72px; */
       height: 72px;
       flex-shrink: 0;
     }
@@ -109,8 +110,11 @@
     .authors-block .costar {
       font-weight: 700;
       color: var(--text);
+      white-space: nowrap;
     }
+    .authors-block .author-name { white-space: nowrap; }
     .authors-block sup { font-size: 0.65em; }
+    .authors-block .heart { color: var(--pink); }
 
     .affiliations {
       margin-top: 8px;
@@ -354,6 +358,107 @@
       margin-right: auto;
     }
 
+    /* ── VIDEO CELLS ── */
+    td.vc {
+      cursor: pointer;
+      transition: background 0.12s;
+    }
+    td.vc:hover { background: #fce8f3; }
+    td.vc.selected { background: var(--pink) !important; color: white !important; font-weight: 700; }
+
+    /* ── VIDEO MODAL ── */
+    #vidModal {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.55);
+      z-index: 1000;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+    #vidModal.open { display: flex; }
+
+    .vid-modal-inner {
+      background: white;
+      border-radius: 14px;
+      padding: 28px;
+      max-width: 960px;
+      width: 100%;
+      max-height: 90vh;
+      overflow-y: auto;
+      position: relative;
+    }
+
+    .vid-modal-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 20px;
+      gap: 12px;
+    }
+
+    .vid-modal-title {
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--text);
+    }
+
+    .vid-close {
+      background: none;
+      border: 1.5px solid var(--border);
+      border-radius: 6px;
+      width: 32px;
+      height: 32px;
+      cursor: pointer;
+      font-size: 1.1rem;
+      line-height: 1;
+      color: var(--text-secondary);
+      flex-shrink: 0;
+    }
+    .vid-close:hover { background: var(--border); }
+
+    #vidContainer {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 14px;
+    }
+
+    .vid-item video {
+      width: 100%;
+      border-radius: 8px;
+      display: block;
+      border: 3px solid transparent;
+    }
+    .vid-item.vid-succ video { border-color: #22c55e; }
+    .vid-item.vid-fail  video { border-color: #ef4444; }
+
+    .vid-label {
+      text-align: center;
+      margin-top: 6px;
+      font-size: 0.82rem;
+      font-weight: 600;
+    }
+    .vid-item.vid-succ .vid-label { color: #16a34a; }
+    .vid-item.vid-fail  .vid-label { color: #dc2626; }
+
+    th[data-task-key] {
+      cursor: default;
+    }
+
+    #vidPrompt {
+      font-size: 0.9rem;
+      color: var(--text-secondary);
+      margin-bottom: 16px;
+    }
+
+    .vid-hint {
+      font-size: 0.75rem;
+      color: #aaa;
+      margin-top: 14px;
+      text-align: center;
+    }
+
     /* ── FOOTER ── */
     footer {
       text-align: center;
@@ -394,26 +499,26 @@
 
   <div class="authors-block" id="authorBlock">
     <div>
-      <span class="costar">Abhay Deshpande<sup>♥1*</sup></span>,&nbsp;
-      <span class="costar">Maya Guru<sup>♥1*</sup></span>,&nbsp;
-      <span class="costar">Rose Hendrix<sup>♥1*</sup></span>,&nbsp;
-      <span class="costar">Snehal Jauhri<sup>♥1,4*</sup></span>
+      <span class="costar">Abhay Deshpande<sup><span class="heart">♥</span>1*</sup></span>,&nbsp;
+      <span class="costar">Maya Guru<sup><span class="heart">♥</span>1*</sup></span>,&nbsp;
+      <span class="costar">Rose Hendrix<sup><span class="heart">♥</span>1*</sup></span>,&nbsp;
+      <span class="costar">Snehal Jauhri<sup><span class="heart">♥</span>1,4*</sup></span>
     </div>
     <div>
-      Ainaz Eftekhar<sup>♥1,2</sup>, Rohun Tripathi<sup>♥1</sup>, Max Argus<sup>♥1</sup>,
-      Jordi Salvador<sup>♥1</sup>, Haoquan Fang<sup>♥1,2</sup>, Matthew Wallingford<sup>♥1</sup>,
-      Wilbert Pumacay<sup>♥1</sup>, Yejin Kim<sup>♥1</sup>
+      <span class="author-name">Ainaz Eftekhar<sup><span class="heart">♥</span>1,2</sup></span>, <span class="author-name">Rohun Tripathi<sup><span class="heart">♥</span>1</sup></span>, <span class="author-name">Max Argus<sup><span class="heart">♥</span>1</sup></span>,
+      <span class="author-name">Jordi Salvador<sup><span class="heart">♥</span>1</sup></span>, <span class="author-name">Haoquan Fang<sup><span class="heart">♥</span>1,2</sup></span>, <span class="author-name">Matthew Wallingford<sup><span class="heart">♥</span>1</sup></span>,
+      <span class="author-name">Wilbert Pumacay<sup><span class="heart">♥</span>1</sup></span>, <span class="author-name">Yejin Kim<sup><span class="heart">♥</span>1</sup></span>
     </div>
     <div>
-      Quinn Pfeifer<sup>2</sup>, Ying-Chun Lee<sup>2</sup>, Piper Wolters<sup>1</sup>,
-      Omar Rayyan<sup>3</sup>, Mingtong Zhang<sup>5</sup>, Jiafei Duan<sup>1,2</sup>,
-      Karen Farley<sup>1</sup>, Winson Han<sup>1</sup>, Eli Vanderbilt<sup>1</sup>
+      <span class="author-name">Quinn Pfeifer<sup>2</sup></span>, <span class="author-name">Ying-Chun Lee<sup>2</sup></span>, <span class="author-name">Piper Wolters<sup>1</sup></span>,
+      <span class="author-name">Omar Rayyan<sup>3</sup></span>, <span class="author-name">Mingtong Zhang<sup>5</sup></span>, <span class="author-name">Jiafei Duan<sup>1,2</sup></span>,
+      <span class="author-name">Karen Farley<sup>1</sup></span>, <span class="author-name">Winson Han<sup>1</sup></span>, <span class="author-name">Eli Vanderbilt<sup>1</sup></span>
     </div>
     <div>
-      Dieter Fox<sup>1,2</sup>, Ali Farhadi<sup>1,2</sup>, Georgia Chalvatzaki<sup>1</sup>
+      <span class="author-name">Dieter Fox<sup>1,2</sup></span>, <span class="author-name">Ali Farhadi<sup>1,2</sup></span>, <span class="author-name">Georgia Chalvatzaki<sup>1</sup></span>
     </div>
     <div>
-      <strong>Dhruv Shah<sup>♥5</sup></strong>, <strong>Ranjay Krishna<sup>†1,2</sup></strong>
+      <span class="author-name"><strong>Dhruv Shah<sup>†5</sup></strong></span>, <span class="author-name"><strong>Ranjay Krishna<sup>†1,2</sup></strong></span>
     </div>
     <div class="affiliations">
       <sup>1</sup>Allen Institute for AI &nbsp;·&nbsp;
@@ -423,14 +528,14 @@
       <sup>5</sup>Princeton University
     </div>
     <div class="contrib-note">
-      * Equal contribution (alphabetical) &nbsp;·&nbsp; ♥ Core contributors &nbsp;·&nbsp; † Equal advising
+      * Equal contribution (alphabetical) &nbsp;·&nbsp; <span class="heart">♥</span> Core contributors &nbsp;·&nbsp; † Equal advising
     </div>
   </div>
 </div>
 
 <!-- LINKS -->
 <div class="links">
-  <a href="resources/paper.pdf" class="link-btn primary">
+  <a href="https://allenai.org/papers/molmobot" class="link-btn primary">
     <svg width="14" height="14" fill="currentColor" viewBox="0 0 16 16"><path d="M5.5 7a.5.5 0 0 0 0 1h5a.5.5 0 0 0 0-1h-5zm0-2a.5.5 0 0 0 0 1h5a.5.5 0 0 0 0-1h-5zM14 0H2a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V2a2 2 0 0 0-2-2zm-1 13H3V3h10v10z"/></svg>
     Paper
   </a>
@@ -440,11 +545,17 @@
   </a>
   <a href="https://github.com/allenai/MolmoBot" class="link-btn outline" target="_blank">
     <svg width="14" height="14" fill="currentColor" viewBox="0 0 16 16"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.012 8.012 0 0 0 16 8c0-4.42-3.58-8-8-8z"/></svg>
-    Code
+    Code (Models)
+  </a>
+  <a href="https://github.com/allenai/molmospaces" class="link-btn outline" target="_blank">
+    <svg width="14" height="14" fill="currentColor" viewBox="0 0 16 16"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.012 8.012 0 0 0 16 8c0-4.42-3.58-8-8-8z"/></svg>
+    Code (Data)
+  </a>
+  <a href="https://huggingface.co/collections/allenai/molmobot-models" class="link-btn outline" target="_blank">
+    🤗 Models
   </a>
   <a href="https://huggingface.co/datasets/allenai/MolmoBot-Data" class="link-btn outline" target="_blank">
-    <svg width="14" height="14" fill="currentColor" viewBox="0 0 16 16"><path d="M8 1a7 7 0 1 0 0 14A7 7 0 0 0 8 1zm0 1a6 6 0 1 1 0 12A6 6 0 0 1 8 2zm0 2a4 4 0 1 0 0 8 4 4 0 0 0 0-8zm0 1a3 3 0 1 1 0 6 3 3 0 0 1 0-6z"/></svg>
-    Dataset
+    🤗 Dataset
   </a>
 </div>
 
@@ -552,6 +663,160 @@
     </div>
   </section>
 
+  <!-- DROID PER-TASK TABLE -->
+  <section>
+    <div class="section-label">Per-Task Breakdown</div>
+    <h2>DROID Real-World Results by Environment</h2>
+    <p>Each cell shows successes out of 3 trials. <strong>Click any cell</strong> to watch the recordings for that policy &amp; task.</p>
+
+    <h3>Workroom</h3>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Policy</th>
+            <th data-task-key="workroom_v1/spoon_tray">Spoon Tray</th><th data-task-key="workroom_v1/spoon_box">Spoon Box</th><th data-task-key="workroom_v1/tape_tray">Tape Tray</th><th data-task-key="workroom_v1/tape_box">Tape Box</th>
+            <th data-task-key="workroom_v1/blue_mug_tray">Blue Mug Tray</th><th data-task-key="workroom_v1/blue_mug_box">Blue Mug Box</th><th data-task-key="workroom_v1/copper_mug_tray">Copper Mug Tray</th><th data-task-key="workroom_v1/copper_mug_box">Copper Mug Box</th>
+            <th data-task-key="workroom_v1/timer_tray">Timer Tray</th><th data-task-key="workroom_v1/timer_box">Timer Box</th><th>Avg</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr class="ours"><td><strong>MolmoBot</strong></td>
+            <td class="vc" data-vid="workroom_v1/spoon_tray/MolmoBot">3/3</td><td class="vc" data-vid="workroom_v1/spoon_box/MolmoBot">2/3</td><td class="vc" data-vid="workroom_v1/tape_tray/MolmoBot">3/3</td><td class="vc" data-vid="workroom_v1/tape_box/MolmoBot">3/3</td>
+            <td class="vc" data-vid="workroom_v1/blue_mug_tray/MolmoBot">3/3</td><td class="vc" data-vid="workroom_v1/blue_mug_box/MolmoBot">3/3</td><td class="vc" data-vid="workroom_v1/copper_mug_tray/MolmoBot">3/3</td><td class="vc" data-vid="workroom_v1/copper_mug_box/MolmoBot">1/3</td>
+            <td class="vc" data-vid="workroom_v1/timer_tray/MolmoBot">3/3</td><td class="vc" data-vid="workroom_v1/timer_box/MolmoBot">3/3</td><td class="best">90%</td></tr>
+          <tr class="ours"><td>MolmoBot-Img</td>
+            <td class="vc" data-vid="workroom_v1/spoon_tray/MolmoBot-Img">3/3</td><td class="vc" data-vid="workroom_v1/spoon_box/MolmoBot-Img">3/3</td><td class="vc" data-vid="workroom_v1/tape_tray/MolmoBot-Img">3/3</td><td class="vc" data-vid="workroom_v1/tape_box/MolmoBot-Img">3/3</td>
+            <td class="vc" data-vid="workroom_v1/blue_mug_tray/MolmoBot-Img">3/3</td><td class="vc" data-vid="workroom_v1/blue_mug_box/MolmoBot-Img">2/3</td><td class="vc" data-vid="workroom_v1/copper_mug_tray/MolmoBot-Img">2/3</td><td class="vc" data-vid="workroom_v1/copper_mug_box/MolmoBot-Img">0/3</td>
+            <td class="vc" data-vid="workroom_v1/timer_tray/MolmoBot-Img">3/3</td><td class="vc" data-vid="workroom_v1/timer_box/MolmoBot-Img">1/3</td><td>77%</td></tr>
+          <tr class="ours"><td>MolmoBot-Pi0</td>
+            <td class="vc" data-vid="workroom_v1/spoon_tray/MolmoBot-Pi0">1/3</td><td class="vc" data-vid="workroom_v1/spoon_box/MolmoBot-Pi0">0/3</td><td class="vc" data-vid="workroom_v1/tape_tray/MolmoBot-Pi0">3/3</td><td class="vc" data-vid="workroom_v1/tape_box/MolmoBot-Pi0">3/3</td>
+            <td class="vc" data-vid="workroom_v1/blue_mug_tray/MolmoBot-Pi0">3/3</td><td class="vc" data-vid="workroom_v1/blue_mug_box/MolmoBot-Pi0">3/3</td><td class="vc" data-vid="workroom_v1/copper_mug_tray/MolmoBot-Pi0">2/3</td><td class="vc" data-vid="workroom_v1/copper_mug_box/MolmoBot-Pi0">1/3</td>
+            <td class="vc" data-vid="workroom_v1/timer_tray/MolmoBot-Pi0">0/3</td><td class="vc" data-vid="workroom_v1/timer_box/MolmoBot-Pi0">2/3</td><td>60%</td></tr>
+          <tr><td>π₀.₅</td>
+            <td class="vc" data-vid="workroom_v1/spoon_tray/pi05-DROID">2/3</td><td class="vc" data-vid="workroom_v1/spoon_box/pi05-DROID">2/3</td><td class="vc" data-vid="workroom_v1/tape_tray/pi05-DROID">2/3</td><td class="vc" data-vid="workroom_v1/tape_box/pi05-DROID">0/3</td>
+            <td class="vc" data-vid="workroom_v1/blue_mug_tray/pi05-DROID">1/3</td><td class="vc" data-vid="workroom_v1/blue_mug_box/pi05-DROID">1/3</td><td class="vc" data-vid="workroom_v1/copper_mug_tray/pi05-DROID">0/3</td><td class="vc" data-vid="workroom_v1/copper_mug_box/pi05-DROID">0/3</td>
+            <td class="vc" data-vid="workroom_v1/timer_tray/pi05-DROID">0/3</td><td class="vc" data-vid="workroom_v1/timer_box/pi05-DROID">0/3</td><td>27%</td></tr>
+          <tr><td>π₀</td>
+            <td class="vc" data-vid="workroom_v1/spoon_tray/pi0-DROID">0/3</td><td class="vc" data-vid="workroom_v1/spoon_box/pi0-DROID">0/3</td><td class="vc" data-vid="workroom_v1/tape_tray/pi0-DROID">1/3</td><td class="vc" data-vid="workroom_v1/tape_box/pi0-DROID">0/3</td>
+            <td class="vc" data-vid="workroom_v1/blue_mug_tray/pi0-DROID">0/3</td><td class="vc" data-vid="workroom_v1/blue_mug_box/pi0-DROID">0/3</td><td class="vc" data-vid="workroom_v1/copper_mug_tray/pi0-DROID">0/3</td><td class="vc" data-vid="workroom_v1/copper_mug_box/pi0-DROID">0/3</td>
+            <td class="vc" data-vid="workroom_v1/timer_tray/pi0-DROID">0/3</td><td class="vc" data-vid="workroom_v1/timer_box/pi0-DROID">0/3</td><td>3%</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>Kitchen</h3>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Policy</th>
+            <th data-task-key="kitchen_v3/apple_easy">Apple Easy</th><th data-task-key="kitchen_v3/apple_hard">Apple Hard</th><th data-task-key="kitchen_v3/mug_easy">Mug Easy</th><th data-task-key="kitchen_v3/mug_hard">Mug Hard</th>
+            <th data-task-key="kitchen_v3/banana_easy">Banana Easy</th><th data-task-key="kitchen_v3/banana_hard">Banana Hard</th><th data-task-key="kitchen_v3/mouse_easy">Mouse Easy</th><th data-task-key="kitchen_v3/mouse_hard">Mouse Hard</th>
+            <th data-task-key="kitchen_v3/clutter_brown">Clutter Brown</th><th data-task-key="kitchen_v3/clutter_black">Clutter Black</th><th>Avg</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr class="ours"><td><strong>MolmoBot</strong></td>
+            <td class="vc" data-vid="kitchen_v3/apple_easy/MolmoBot">1/3</td><td class="vc" data-vid="kitchen_v3/apple_hard/MolmoBot">2/3</td><td class="vc" data-vid="kitchen_v3/mug_easy/MolmoBot">3/3</td><td class="vc" data-vid="kitchen_v3/mug_hard/MolmoBot">3/3</td>
+            <td class="vc" data-vid="kitchen_v3/banana_easy/MolmoBot">3/3</td><td class="vc" data-vid="kitchen_v3/banana_hard/MolmoBot">3/3</td><td class="vc" data-vid="kitchen_v3/mouse_easy/MolmoBot">3/3</td><td class="vc" data-vid="kitchen_v3/mouse_hard/MolmoBot">3/3</td>
+            <td class="vc" data-vid="kitchen_v3/clutter_brown/MolmoBot">0/3</td><td class="vc" data-vid="kitchen_v3/clutter_black/MolmoBot">0/3</td><td>70%</td></tr>
+          <tr class="ours"><td>MolmoBot-Img</td>
+            <td class="vc" data-vid="kitchen_v3/apple_easy/MolmoBot-Img">3/3</td><td class="vc" data-vid="kitchen_v3/apple_hard/MolmoBot-Img">3/3</td><td class="vc" data-vid="kitchen_v3/mug_easy/MolmoBot-Img">2/3</td><td class="vc" data-vid="kitchen_v3/mug_hard/MolmoBot-Img">3/3</td>
+            <td class="vc" data-vid="kitchen_v3/banana_easy/MolmoBot-Img">3/3</td><td class="vc" data-vid="kitchen_v3/banana_hard/MolmoBot-Img">3/3</td><td class="vc" data-vid="kitchen_v3/mouse_easy/MolmoBot-Img">3/3</td><td class="vc" data-vid="kitchen_v3/mouse_hard/MolmoBot-Img">2/3</td>
+            <td class="vc" data-vid="kitchen_v3/clutter_brown/MolmoBot-Img">3/3</td><td class="vc" data-vid="kitchen_v3/clutter_black/MolmoBot-Img">1/3</td><td class="best">87%</td></tr>
+          <tr class="ours"><td>MolmoBot-Pi0</td>
+            <td class="vc" data-vid="kitchen_v3/apple_easy/MolmoBot-Pi0">2/3</td><td class="vc" data-vid="kitchen_v3/apple_hard/MolmoBot-Pi0">3/3</td><td class="vc" data-vid="kitchen_v3/mug_easy/MolmoBot-Pi0">2/3</td><td class="vc" data-vid="kitchen_v3/mug_hard/MolmoBot-Pi0">0/3</td>
+            <td class="vc" data-vid="kitchen_v3/banana_easy/MolmoBot-Pi0">3/3</td><td class="vc" data-vid="kitchen_v3/banana_hard/MolmoBot-Pi0">1/3</td><td class="vc" data-vid="kitchen_v3/mouse_easy/MolmoBot-Pi0">3/3</td><td class="vc" data-vid="kitchen_v3/mouse_hard/MolmoBot-Pi0">2/3</td>
+            <td class="vc" data-vid="kitchen_v3/clutter_brown/MolmoBot-Pi0">0/3</td><td class="vc" data-vid="kitchen_v3/clutter_black/MolmoBot-Pi0">0/3</td><td>53%</td></tr>
+          <tr><td>π₀.₅</td>
+            <td class="vc" data-vid="kitchen_v3/apple_easy/pi05-DROID">3/3</td><td class="vc" data-vid="kitchen_v3/apple_hard/pi05-DROID">0/3</td><td class="vc" data-vid="kitchen_v3/mug_easy/pi05-DROID">2/3</td><td class="vc" data-vid="kitchen_v3/mug_hard/pi05-DROID">1/3</td>
+            <td class="vc" data-vid="kitchen_v3/banana_easy/pi05-DROID">3/3</td><td class="vc" data-vid="kitchen_v3/banana_hard/pi05-DROID">2/3</td><td class="vc" data-vid="kitchen_v3/mouse_easy/pi05-DROID">3/3</td><td class="vc" data-vid="kitchen_v3/mouse_hard/pi05-DROID">1/3</td>
+            <td class="vc" data-vid="kitchen_v3/clutter_brown/pi05-DROID">2/3</td><td class="vc" data-vid="kitchen_v3/clutter_black/pi05-DROID">2/3</td><td>63%</td></tr>
+          <tr><td>π₀</td>
+            <td class="vc" data-vid="kitchen_v3/apple_easy/pi0-DROID">0/3</td><td class="vc" data-vid="kitchen_v3/apple_hard/pi0-DROID">1/3</td><td class="vc" data-vid="kitchen_v3/mug_easy/pi0-DROID">0/3</td><td class="vc" data-vid="kitchen_v3/mug_hard/pi0-DROID">0/3</td>
+            <td class="vc" data-vid="kitchen_v3/banana_easy/pi0-DROID">1/3</td><td class="vc" data-vid="kitchen_v3/banana_hard/pi0-DROID">0/3</td><td class="vc" data-vid="kitchen_v3/mouse_easy/pi0-DROID">3/3</td><td class="vc" data-vid="kitchen_v3/mouse_hard/pi0-DROID">1/3</td>
+            <td class="vc" data-vid="kitchen_v3/clutter_brown/pi0-DROID">0/3</td><td class="vc" data-vid="kitchen_v3/clutter_black/pi0-DROID">0/3</td><td>20%</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>Bedroom</h3>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Policy</th>
+            <th data-task-key="bedroom_v1/pills_towel">Pills Towel</th><th data-task-key="bedroom_v1/pills_basket">Pills Basket</th><th data-task-key="bedroom_v1/roller_towel">Roller Towel</th><th data-task-key="bedroom_v1/roller_basket">Roller Basket</th>
+            <th data-task-key="bedroom_v1/banana_towel">Banana Towel</th><th data-task-key="bedroom_v1/banana_basket">Banana Basket</th><th data-task-key="bedroom_v1/ball_towel">Ball Towel</th><th data-task-key="bedroom_v1/ball_basket">Ball Basket</th>
+            <th data-task-key="bedroom_v1/clutter_towel">Clutter Towel</th><th data-task-key="bedroom_v1/clutter_basket">Clutter Basket</th><th>Avg</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr class="ours"><td><strong>MolmoBot</strong></td>
+            <td class="vc" data-vid="bedroom_v1/pills_towel/MolmoBot">3/3</td><td class="vc" data-vid="bedroom_v1/pills_basket/MolmoBot">3/3</td><td class="vc" data-vid="bedroom_v1/roller_towel/MolmoBot">3/3</td><td class="vc" data-vid="bedroom_v1/roller_basket/MolmoBot">0/3</td>
+            <td class="vc" data-vid="bedroom_v1/banana_towel/MolmoBot">3/3</td><td class="vc" data-vid="bedroom_v1/banana_basket/MolmoBot">2/3</td><td class="vc" data-vid="bedroom_v1/ball_towel/MolmoBot">3/3</td><td class="vc" data-vid="bedroom_v1/ball_basket/MolmoBot">3/3</td>
+            <td class="vc" data-vid="bedroom_v1/clutter_towel/MolmoBot">3/3</td><td class="vc" data-vid="bedroom_v1/clutter_basket/MolmoBot">3/3</td><td class="best">87%</td></tr>
+          <tr class="ours"><td>MolmoBot-Img</td>
+            <td class="vc" data-vid="bedroom_v1/pills_towel/MolmoBot-Img">0/3</td><td class="vc" data-vid="bedroom_v1/pills_basket/MolmoBot-Img">0/3</td><td class="vc" data-vid="bedroom_v1/roller_towel/MolmoBot-Img">1/3</td><td class="vc" data-vid="bedroom_v1/roller_basket/MolmoBot-Img">2/3</td>
+            <td class="vc" data-vid="bedroom_v1/banana_towel/MolmoBot-Img">3/3</td><td class="vc" data-vid="bedroom_v1/banana_basket/MolmoBot-Img">3/3</td><td class="vc" data-vid="bedroom_v1/ball_towel/MolmoBot-Img">3/3</td><td class="vc" data-vid="bedroom_v1/ball_basket/MolmoBot-Img">2/3</td>
+            <td class="vc" data-vid="bedroom_v1/clutter_towel/MolmoBot-Img">3/3</td><td class="vc" data-vid="bedroom_v1/clutter_basket/MolmoBot-Img">3/3</td><td>67%</td></tr>
+          <tr class="ours"><td>MolmoBot-Pi0</td>
+            <td class="vc" data-vid="bedroom_v1/pills_towel/MolmoBot-Pi0">2/3</td><td class="vc" data-vid="bedroom_v1/pills_basket/MolmoBot-Pi0">0/3</td><td class="vc" data-vid="bedroom_v1/roller_towel/MolmoBot-Pi0">2/3</td><td class="vc" data-vid="bedroom_v1/roller_basket/MolmoBot-Pi0">0/3</td>
+            <td class="vc" data-vid="bedroom_v1/banana_towel/MolmoBot-Pi0">0/3</td><td class="vc" data-vid="bedroom_v1/banana_basket/MolmoBot-Pi0">0/3</td><td class="vc" data-vid="bedroom_v1/ball_towel/MolmoBot-Pi0">1/3</td><td class="vc" data-vid="bedroom_v1/ball_basket/MolmoBot-Pi0">0/3</td>
+            <td class="vc" data-vid="bedroom_v1/clutter_towel/MolmoBot-Pi0">0/3</td><td class="vc" data-vid="bedroom_v1/clutter_basket/MolmoBot-Pi0">2/3</td><td>23%</td></tr>
+          <tr><td>π₀.₅</td>
+            <td class="vc" data-vid="bedroom_v1/pills_towel/pi05-DROID">0/3</td><td class="vc" data-vid="bedroom_v1/pills_basket/pi05-DROID">0/3</td><td class="vc" data-vid="bedroom_v1/roller_towel/pi05-DROID">0/3</td><td class="vc" data-vid="bedroom_v1/roller_basket/pi05-DROID">0/3</td>
+            <td class="vc" data-vid="bedroom_v1/banana_towel/pi05-DROID">1/3</td><td class="vc" data-vid="bedroom_v1/banana_basket/pi05-DROID">0/3</td><td class="vc" data-vid="bedroom_v1/ball_towel/pi05-DROID">0/3</td><td class="vc" data-vid="bedroom_v1/ball_basket/pi05-DROID">0/3</td>
+            <td class="vc" data-vid="bedroom_v1/clutter_towel/pi05-DROID">2/3</td><td class="vc" data-vid="bedroom_v1/clutter_basket/pi05-DROID">0/3</td><td>10%</td></tr>
+          <tr><td>π₀</td>
+            <td class="vc" data-vid="bedroom_v1/pills_towel/pi0-DROID">0/3</td><td class="vc" data-vid="bedroom_v1/pills_basket/pi0-DROID">0/3</td><td class="vc" data-vid="bedroom_v1/roller_towel/pi0-DROID">0/3</td><td class="vc" data-vid="bedroom_v1/roller_basket/pi0-DROID">0/3</td>
+            <td class="vc" data-vid="bedroom_v1/banana_towel/pi0-DROID">0/3</td><td class="vc" data-vid="bedroom_v1/banana_basket/pi0-DROID">0/3</td><td class="vc" data-vid="bedroom_v1/ball_towel/pi0-DROID">0/3</td><td class="vc" data-vid="bedroom_v1/ball_basket/pi0-DROID">0/3</td>
+            <td class="vc" data-vid="bedroom_v1/clutter_towel/pi0-DROID">0/3</td><td class="vc" data-vid="bedroom_v1/clutter_basket/pi0-DROID">0/3</td><td>0%</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>Office</h3>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Policy</th>
+            <th data-task-key="robomolmo_princeton/knife_board">Knife Board</th><th data-task-key="robomolmo_princeton/banana_plate">Banana Plate</th><th data-task-key="robomolmo_princeton/marker_mug">Marker Mug</th><th data-task-key="robomolmo_princeton/scissors_bowl">Scissors Bowl</th>
+            <th data-task-key="robomolmo_princeton/carrot_basket">Carrot Basket</th><th data-task-key="robomolmo_princeton/knife_green_bowl">Knife Green Bowl</th><th data-task-key="robomolmo_princeton/screwdriver_blue_bowl">Screwdriver Blue Bowl</th><th data-task-key="robomolmo_princeton/mouse_blue_bowl">Mouse Blue Bowl</th>
+            <th data-task-key="robomolmo_princeton/mug_bowl">Mug Bowl</th><th data-task-key="robomolmo_princeton/marker_box">Marker Box</th><th>Avg</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr class="ours"><td><strong>MolmoBot</strong></td>
+            <td class="vc" data-vid="robomolmo_princeton/knife_board/MolmoBot">2/3</td><td class="vc" data-vid="robomolmo_princeton/banana_plate/MolmoBot">3/3</td><td class="vc" data-vid="robomolmo_princeton/marker_mug/MolmoBot">1/3</td><td class="vc" data-vid="robomolmo_princeton/scissors_bowl/MolmoBot">2/3</td>
+            <td class="vc" data-vid="robomolmo_princeton/carrot_basket/MolmoBot">2/3</td><td class="vc" data-vid="robomolmo_princeton/knife_green_bowl/MolmoBot">2/3</td><td class="vc" data-vid="robomolmo_princeton/screwdriver_blue_bowl/MolmoBot">3/3</td><td class="vc" data-vid="robomolmo_princeton/mouse_blue_bowl/MolmoBot">2/3</td>
+            <td class="vc" data-vid="robomolmo_princeton/mug_bowl/MolmoBot">3/3</td><td class="vc" data-vid="robomolmo_princeton/marker_box/MolmoBot">1/3</td><td class="best">70%</td></tr>
+          <tr class="ours"><td>MolmoBot-Img</td>
+            <td class="vc" data-vid="robomolmo_princeton/knife_board/MolmoBot-Img">2/3</td><td class="vc" data-vid="robomolmo_princeton/banana_plate/MolmoBot-Img">1/3</td><td class="vc" data-vid="robomolmo_princeton/marker_mug/MolmoBot-Img">0/3</td><td class="vc" data-vid="robomolmo_princeton/scissors_bowl/MolmoBot-Img">1/3</td>
+            <td class="vc" data-vid="robomolmo_princeton/carrot_basket/MolmoBot-Img">3/3</td><td class="vc" data-vid="robomolmo_princeton/knife_green_bowl/MolmoBot-Img">1/3</td><td class="vc" data-vid="robomolmo_princeton/screwdriver_blue_bowl/MolmoBot-Img">3/3</td><td class="vc" data-vid="robomolmo_princeton/mouse_blue_bowl/MolmoBot-Img">2/3</td>
+            <td class="vc" data-vid="robomolmo_princeton/mug_bowl/MolmoBot-Img">3/3</td><td class="vc" data-vid="robomolmo_princeton/marker_box/MolmoBot-Img">2/3</td><td>60%</td></tr>
+          <tr class="ours"><td>MolmoBot-Pi0</td>
+            <td class="vc" data-vid="robomolmo_princeton/knife_board/MolmoBot-Pi0">1/3</td><td class="vc" data-vid="robomolmo_princeton/banana_plate/MolmoBot-Pi0">3/3</td><td class="vc" data-vid="robomolmo_princeton/marker_mug/MolmoBot-Pi0">0/3</td><td class="vc" data-vid="robomolmo_princeton/scissors_bowl/MolmoBot-Pi0">0/3</td>
+            <td class="vc" data-vid="robomolmo_princeton/carrot_basket/MolmoBot-Pi0">0/3</td><td class="vc" data-vid="robomolmo_princeton/knife_green_bowl/MolmoBot-Pi0">1/3</td><td class="vc" data-vid="robomolmo_princeton/screwdriver_blue_bowl/MolmoBot-Pi0">3/3</td><td class="vc" data-vid="robomolmo_princeton/mouse_blue_bowl/MolmoBot-Pi0">2/3</td>
+            <td class="vc" data-vid="robomolmo_princeton/mug_bowl/MolmoBot-Pi0">3/3</td><td class="vc" data-vid="robomolmo_princeton/marker_box/MolmoBot-Pi0">2/3</td><td>50%</td></tr>
+          <tr><td>π₀.₅</td>
+            <td class="vc" data-vid="robomolmo_princeton/knife_board/pi05-DROID">2/3</td><td class="vc" data-vid="robomolmo_princeton/banana_plate/pi05-DROID">3/3</td><td class="vc" data-vid="robomolmo_princeton/marker_mug/pi05-DROID">1/3</td><td class="vc" data-vid="robomolmo_princeton/scissors_bowl/pi05-DROID">1/3</td>
+            <td class="vc" data-vid="robomolmo_princeton/carrot_basket/pi05-DROID">1/3</td><td class="vc" data-vid="robomolmo_princeton/knife_green_bowl/pi05-DROID">1/3</td><td class="vc" data-vid="robomolmo_princeton/screwdriver_blue_bowl/pi05-DROID">2/3</td><td class="vc" data-vid="robomolmo_princeton/mouse_blue_bowl/pi05-DROID">1/3</td>
+            <td class="vc" data-vid="robomolmo_princeton/mug_bowl/pi05-DROID">3/3</td><td class="vc" data-vid="robomolmo_princeton/marker_box/pi05-DROID">2/3</td><td>57%</td></tr>
+          <tr><td>π₀</td>
+            <td class="vc" data-vid="robomolmo_princeton/knife_board/pi0-DROID">0/3</td><td class="vc" data-vid="robomolmo_princeton/banana_plate/pi0-DROID">0/3</td><td class="vc" data-vid="robomolmo_princeton/marker_mug/pi0-DROID">0/3</td><td class="vc" data-vid="robomolmo_princeton/scissors_bowl/pi0-DROID">0/3</td>
+            <td class="vc" data-vid="robomolmo_princeton/carrot_basket/pi0-DROID">1/3</td><td class="vc" data-vid="robomolmo_princeton/knife_green_bowl/pi0-DROID">1/3</td><td class="vc" data-vid="robomolmo_princeton/screwdriver_blue_bowl/pi0-DROID">1/3</td><td class="vc" data-vid="robomolmo_princeton/mouse_blue_bowl/pi0-DROID">1/3</td>
+            <td class="vc" data-vid="robomolmo_princeton/mug_bowl/pi0-DROID">0/3</td><td class="vc" data-vid="robomolmo_princeton/marker_box/pi0-DROID">0/3</td><td>13%</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="table-caption">
+      <strong>Pink rows</strong> are our models. Click any data cell to watch the episode recordings.
+    </p>
+  </section>
+
   <!-- MAIN SIM RESULTS TABLE -->
   <section>
     <div class="section-label">Simulation Evaluation</div>
@@ -633,104 +898,10 @@
     </p>
   </section>
 
-  <!-- DROID PER-TASK TABLE -->
-  <section>
-    <div class="section-label">Per-Task Breakdown</div>
-    <h2>DROID Real-World Results by Environment</h2>
-    <p>Each cell shows successes out of 3 trials per task. 4 environments × 10 tasks × 3 trials = 120 total episodes per policy.</p>
-
-    <h3>Workroom</h3>
-    <div class="table-wrap">
-      <table>
-        <thead>
-          <tr>
-            <th>Policy</th>
-            <th>Spoon Tray</th><th>Spoon Box</th><th>Tape Tray</th><th>Tape Box</th>
-            <th>Blue Mug Tray</th><th>Blue Mug Box</th><th>Copper Mug Tray</th><th>Copper Mug Box</th>
-            <th>Timer Tray</th><th>Timer Box</th><th>Avg</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr class="ours"><td><strong>MolmoBot</strong></td><td>3/3</td><td>2/3</td><td>3/3</td><td>3/3</td><td>3/3</td><td>3/3</td><td>3/3</td><td>1/3</td><td>3/3</td><td>3/3</td><td class="best">90%</td></tr>
-          <tr class="ours"><td>MolmoBot-Img</td><td>3/3</td><td>3/3</td><td>3/3</td><td>3/3</td><td>3/3</td><td>2/3</td><td>2/3</td><td>0/3</td><td>3/3</td><td>1/3</td><td>77%</td></tr>
-          <tr class="ours"><td>MolmoBot-Pi0</td><td>1/3</td><td>0/3</td><td>3/3</td><td>3/3</td><td>3/3</td><td>3/3</td><td>2/3</td><td>1/3</td><td>0/3</td><td>2/3</td><td>60%</td></tr>
-          <tr><td>π₀.₅</td><td>2/3</td><td>2/3</td><td>2/3</td><td>0/3</td><td>1/3</td><td>1/3</td><td>0/3</td><td>0/3</td><td>0/3</td><td>0/3</td><td>27%</td></tr>
-          <tr><td>π₀</td><td>0/3</td><td>0/3</td><td>1/3</td><td>0/3</td><td>0/3</td><td>0/3</td><td>0/3</td><td>0/3</td><td>0/3</td><td>0/3</td><td>3%</td></tr>
-        </tbody>
-      </table>
-    </div>
-
-    <h3>Kitchen</h3>
-    <div class="table-wrap">
-      <table>
-        <thead>
-          <tr>
-            <th>Policy</th>
-            <th>Apple Easy</th><th>Apple Hard</th><th>Mug Easy</th><th>Mug Hard</th>
-            <th>Banana Easy</th><th>Banana Hard</th><th>Mouse Easy</th><th>Mouse Hard</th>
-            <th>Clutter Brown</th><th>Clutter Black</th><th>Avg</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr class="ours"><td><strong>MolmoBot</strong></td><td>1/3</td><td>2/3</td><td>3/3</td><td>3/3</td><td>3/3</td><td>3/3</td><td>3/3</td><td>3/3</td><td>0/3</td><td>0/3</td><td>70%</td></tr>
-          <tr class="ours"><td>MolmoBot-Img</td><td>3/3</td><td>3/3</td><td>2/3</td><td>3/3</td><td>3/3</td><td>3/3</td><td>3/3</td><td>2/3</td><td>3/3</td><td>1/3</td><td class="best">87%</td></tr>
-          <tr class="ours"><td>MolmoBot-Pi0</td><td>2/3</td><td>3/3</td><td>2/3</td><td>0/3</td><td>3/3</td><td>1/3</td><td>3/3</td><td>2/3</td><td>0/3</td><td>0/3</td><td>53%</td></tr>
-          <tr><td>π₀.₅</td><td>3/3</td><td>0/3</td><td>2/3</td><td>1/3</td><td>3/3</td><td>2/3</td><td>3/3</td><td>1/3</td><td>2/3</td><td>2/3</td><td>63%</td></tr>
-          <tr><td>π₀</td><td>0/3</td><td>1/3</td><td>0/3</td><td>0/3</td><td>1/3</td><td>0/3</td><td>3/3</td><td>1/3</td><td>0/3</td><td>0/3</td><td>20%</td></tr>
-        </tbody>
-      </table>
-    </div>
-
-    <h3>Bedroom</h3>
-    <div class="table-wrap">
-      <table>
-        <thead>
-          <tr>
-            <th>Policy</th>
-            <th>Pills Towel</th><th>Pills Basket</th><th>Roller Towel</th><th>Roller Basket</th>
-            <th>Banana Towel</th><th>Banana Basket</th><th>Ball Towel</th><th>Ball Basket</th>
-            <th>Clutter Towel</th><th>Clutter Basket</th><th>Avg</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr class="ours"><td><strong>MolmoBot</strong></td><td>3/3</td><td>3/3</td><td>3/3</td><td>0/3</td><td>3/3</td><td>2/3</td><td>3/3</td><td>3/3</td><td>3/3</td><td>3/3</td><td class="best">87%</td></tr>
-          <tr class="ours"><td>MolmoBot-Img</td><td>0/3</td><td>0/3</td><td>1/3</td><td>2/3</td><td>3/3</td><td>3/3</td><td>3/3</td><td>2/3</td><td>3/3</td><td>3/3</td><td>67%</td></tr>
-          <tr class="ours"><td>MolmoBot-Pi0</td><td>2/3</td><td>0/3</td><td>2/3</td><td>0/3</td><td>0/3</td><td>0/3</td><td>1/3</td><td>0/3</td><td>0/3</td><td>2/3</td><td>23%</td></tr>
-          <tr><td>π₀.₅</td><td>0/3</td><td>0/3</td><td>0/3</td><td>0/3</td><td>1/3</td><td>0/3</td><td>0/3</td><td>0/3</td><td>2/3</td><td>0/3</td><td>10%</td></tr>
-          <tr><td>π₀</td><td>0/3</td><td>0/3</td><td>0/3</td><td>0/3</td><td>0/3</td><td>0/3</td><td>0/3</td><td>0/3</td><td>0/3</td><td>0/3</td><td>0%</td></tr>
-        </tbody>
-      </table>
-    </div>
-
-    <h3>Office</h3>
-    <div class="table-wrap">
-      <table>
-        <thead>
-          <tr>
-            <th>Policy</th>
-            <th>Knife Board</th><th>Banana Plate</th><th>Marker Mug</th><th>Scissors Bowl</th>
-            <th>Carrot Basket</th><th>Knife Green Bowl</th><th>Screwdriver Blue Bowl</th><th>Mouse Blue Bowl</th>
-            <th>Mug Bowl</th><th>Marker Box</th><th>Avg</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr class="ours"><td><strong>MolmoBot</strong></td><td>2/3</td><td>3/3</td><td>1/3</td><td>2/3</td><td>2/3</td><td>2/3</td><td>3/3</td><td>2/3</td><td>3/3</td><td>1/3</td><td class="best">70%</td></tr>
-          <tr class="ours"><td>MolmoBot-Img</td><td>2/3</td><td>1/3</td><td>0/3</td><td>1/3</td><td>3/3</td><td>1/3</td><td>3/3</td><td>2/3</td><td>3/3</td><td>2/3</td><td>60%</td></tr>
-          <tr class="ours"><td>MolmoBot-Pi0</td><td>1/3</td><td>3/3</td><td>0/3</td><td>0/3</td><td>0/3</td><td>1/3</td><td>3/3</td><td>2/3</td><td>3/3</td><td>2/3</td><td>50%</td></tr>
-          <tr><td>π₀.₅</td><td>2/3</td><td>3/3</td><td>1/3</td><td>1/3</td><td>1/3</td><td>1/3</td><td>2/3</td><td>1/3</td><td>3/3</td><td>2/3</td><td>57%</td></tr>
-          <tr><td>π₀</td><td>0/3</td><td>0/3</td><td>0/3</td><td>0/3</td><td>1/3</td><td>1/3</td><td>1/3</td><td>1/3</td><td>0/3</td><td>0/3</td><td>13%</td></tr>
-        </tbody>
-      </table>
-    </div>
-    <p class="table-caption">
-      <strong>Pink rows</strong> are our models. Per-task breakdown of DROID real-world evaluation (3 trials each).
-    </p>
-  </section>
-
   <!-- RB-Y1 SIM RESULTS -->
   <section>
     <div class="section-label">Mobile Manipulation</div>
-    <h2>RB-Y1 Simulation Results (Table 8)</h2>
+    <h2>RB-Y1 Simulation Results</h2>
     <p>Zero-shot simulation evaluation for RB-Y1 policies on held-out environments.</p>
     <div class="table-wrap">
       <table>
@@ -761,10 +932,20 @@
 
 <footer>
   <img src="static/img/ai2_logo.png" alt="Allen Institute for AI" style="height:28px; margin-bottom:8px; display:block; margin-left:auto; margin-right:auto;" />
-  MolmoBot · Allen Institute for AI · 2025 ·
-  <a href="resources/paper.pdf">Paper</a> ·
-  <a href="https://allenai.org/blog/molmobot-robot-manipulation" target="_blank">Blog</a>
+  MolmoBot · Allen Institute for AI · 2025
 </footer>
+
+<!-- VIDEO MODAL -->
+<div id="vidModal" onclick="closeModalOnBackdrop(event)">
+  <div class="vid-modal-inner">
+    <div class="vid-modal-header">
+      <div class="vid-modal-title" id="vidTitle"></div>
+      <button class="vid-close" onclick="closeModal()" title="Close">✕</button>
+    </div>
+    <div id="vidContainer"></div>
+    <p class="vid-hint">Videos may take a moment to buffer.</p>
+  </div>
+</div>
 
 <script>
   function toggleAuthors() {
@@ -773,6 +954,177 @@
     block.classList.toggle('open');
     btn.textContent = block.classList.contains('open') ? '▲ Hide Authors' : '▼ Show Authors';
   }
+
+  // ── Video cell click ──────────────────────────────────────────────
+  const S3 = "https://ai2-prior-molmobot.s3.us-west-2.amazonaws.com/videos/droid_eval/";
+
+  const PROMPTS = {
+    "workroom_v1/spoon_tray":       "put the wooden spoon on the light blue tray",
+    "workroom_v1/spoon_box":        "put the wooden spoon in the wooden box",
+    "workroom_v1/tape_tray":        "put the blue tape on the light blue tray",
+    "workroom_v1/tape_box":         "put the blue tape in the wooden box",
+    "workroom_v1/blue_mug_tray":    "put the blue mug on the light blue tray",
+    "workroom_v1/blue_mug_box":     "put the blue mug in the wooden box",
+    "workroom_v1/copper_mug_tray":  "put the copper mug on the light blue tray",
+    "workroom_v1/copper_mug_box":   "put the copper mug in the wooden box",
+    "workroom_v1/timer_tray":       "put the green timer on the light blue tray",
+    "workroom_v1/timer_box":        "put the green timer in the wooden box",
+    "kitchen_v3/apple_easy":        "put the apple in the brown bowl",
+    "kitchen_v3/apple_hard":        "put the apple in the brown bowl",
+    "kitchen_v3/mug_easy":          "put the mug in the brown bowl",
+    "kitchen_v3/mug_hard":          "put the mug in the brown bowl",
+    "kitchen_v3/banana_easy":       "put the banana in the brown bowl",
+    "kitchen_v3/banana_hard":       "put the banana in the brown bowl",
+    "kitchen_v3/mouse_easy":        "put the computer mouse in the brown bowl",
+    "kitchen_v3/mouse_hard":        "put the computer mouse in the brown bowl",
+    "kitchen_v3/clutter_brown":     "put the mug in the brown bowl",
+    "kitchen_v3/clutter_black":     "put the mug in the black bowl",
+    "bedroom_v1/pills_towel":       "put the pill bottle on the yellow towel",
+    "bedroom_v1/pills_basket":      "put the pill bottle in the basket",
+    "bedroom_v1/roller_towel":      "put the lint roller on the yellow towel",
+    "bedroom_v1/roller_basket":     "put the lint roller in the basket",
+    "bedroom_v1/banana_towel":      "put the banana on the yellow towel",
+    "bedroom_v1/banana_basket":     "put the banana in the basket",
+    "bedroom_v1/ball_towel":        "put the tennis ball on the yellow towel",
+    "bedroom_v1/ball_basket":       "put the tennis ball in the basket",
+    "bedroom_v1/clutter_towel":     "put the banana on the yellow towel",
+    "bedroom_v1/clutter_basket":    "put the banana in the basket",
+    "robomolmo_princeton/knife_board":           "put the knife on the cutting board",
+    "robomolmo_princeton/banana_plate":          "move the toy banana on the plate",
+    "robomolmo_princeton/marker_mug":            "put the marker into the mug",
+    "robomolmo_princeton/scissors_bowl":         "pick up the scissor and place it inside the bowl",
+    "robomolmo_princeton/carrot_basket":         "put the carrot into the basket",
+    "robomolmo_princeton/knife_green_bowl":      "pick up the knife and place it inside the green bowl",
+    "robomolmo_princeton/screwdriver_blue_bowl": "put the screwdriver in the blue bowl",
+    "robomolmo_princeton/mouse_blue_bowl":       "place the mouse into the blue bowl",
+    "robomolmo_princeton/mug_bowl":              "grasp the mug and put it inside the bowl",
+    "robomolmo_princeton/marker_box":            "pick up the red marker and place it into the box",
+  };
+
+  // Outcome strings: 3 chars, 's'=success 'f'=failure, trials 1-2-3
+  const V = {
+    "workroom_v1/spoon_tray/MolmoBot":"sss","workroom_v1/spoon_tray/MolmoBot-Img":"sss","workroom_v1/spoon_tray/MolmoBot-Pi0":"ffs","workroom_v1/spoon_tray/pi05-DROID":"ssf","workroom_v1/spoon_tray/pi0-DROID":"fff",
+    "workroom_v1/spoon_box/MolmoBot":"fss","workroom_v1/spoon_box/MolmoBot-Img":"sss","workroom_v1/spoon_box/MolmoBot-Pi0":"fff","workroom_v1/spoon_box/pi05-DROID":"ssf","workroom_v1/spoon_box/pi0-DROID":"fff",
+    "workroom_v1/tape_tray/MolmoBot":"sss","workroom_v1/tape_tray/MolmoBot-Img":"sss","workroom_v1/tape_tray/MolmoBot-Pi0":"sss","workroom_v1/tape_tray/pi05-DROID":"fss","workroom_v1/tape_tray/pi0-DROID":"ffs",
+    "workroom_v1/tape_box/MolmoBot":"sss","workroom_v1/tape_box/MolmoBot-Img":"sss","workroom_v1/tape_box/MolmoBot-Pi0":"sss","workroom_v1/tape_box/pi05-DROID":"fff","workroom_v1/tape_box/pi0-DROID":"fff",
+    "workroom_v1/blue_mug_tray/MolmoBot":"sss","workroom_v1/blue_mug_tray/MolmoBot-Img":"sss","workroom_v1/blue_mug_tray/MolmoBot-Pi0":"sss","workroom_v1/blue_mug_tray/pi05-DROID":"ffs","workroom_v1/blue_mug_tray/pi0-DROID":"fff",
+    "workroom_v1/blue_mug_box/MolmoBot":"sss","workroom_v1/blue_mug_box/MolmoBot-Img":"ssf","workroom_v1/blue_mug_box/MolmoBot-Pi0":"sss","workroom_v1/blue_mug_box/pi05-DROID":"ffs","workroom_v1/blue_mug_box/pi0-DROID":"fff",
+    "workroom_v1/copper_mug_tray/MolmoBot":"sss","workroom_v1/copper_mug_tray/MolmoBot-Img":"fss","workroom_v1/copper_mug_tray/MolmoBot-Pi0":"fss","workroom_v1/copper_mug_tray/pi05-DROID":"fff","workroom_v1/copper_mug_tray/pi0-DROID":"fff",
+    "workroom_v1/copper_mug_box/MolmoBot":"fsf","workroom_v1/copper_mug_box/MolmoBot-Img":"fff","workroom_v1/copper_mug_box/MolmoBot-Pi0":"ffs","workroom_v1/copper_mug_box/pi05-DROID":"fff","workroom_v1/copper_mug_box/pi0-DROID":"fff",
+    "workroom_v1/timer_tray/MolmoBot":"sss","workroom_v1/timer_tray/MolmoBot-Img":"sss","workroom_v1/timer_tray/MolmoBot-Pi0":"fff","workroom_v1/timer_tray/pi05-DROID":"fff","workroom_v1/timer_tray/pi0-DROID":"fff",
+    "workroom_v1/timer_box/MolmoBot":"sss","workroom_v1/timer_box/MolmoBot-Img":"fsf","workroom_v1/timer_box/MolmoBot-Pi0":"sfs","workroom_v1/timer_box/pi05-DROID":"fff","workroom_v1/timer_box/pi0-DROID":"fff",
+
+    "kitchen_v3/apple_easy/MolmoBot":"fsf","kitchen_v3/apple_easy/MolmoBot-Img":"sss","kitchen_v3/apple_easy/MolmoBot-Pi0":"ssf","kitchen_v3/apple_easy/pi05-DROID":"sss","kitchen_v3/apple_easy/pi0-DROID":"fff",
+    "kitchen_v3/apple_hard/MolmoBot":"sfs","kitchen_v3/apple_hard/MolmoBot-Img":"sss","kitchen_v3/apple_hard/MolmoBot-Pi0":"sss","kitchen_v3/apple_hard/pi05-DROID":"fff","kitchen_v3/apple_hard/pi0-DROID":"fsf",
+    "kitchen_v3/mug_easy/MolmoBot":"sss","kitchen_v3/mug_easy/MolmoBot-Img":"fss","kitchen_v3/mug_easy/MolmoBot-Pi0":"fss","kitchen_v3/mug_easy/pi05-DROID":"ssf","kitchen_v3/mug_easy/pi0-DROID":"fff",
+    "kitchen_v3/mug_hard/MolmoBot":"sss","kitchen_v3/mug_hard/MolmoBot-Img":"sss","kitchen_v3/mug_hard/MolmoBot-Pi0":"fff","kitchen_v3/mug_hard/pi05-DROID":"sff","kitchen_v3/mug_hard/pi0-DROID":"fff",
+    "kitchen_v3/banana_easy/MolmoBot":"sss","kitchen_v3/banana_easy/MolmoBot-Img":"sss","kitchen_v3/banana_easy/MolmoBot-Pi0":"sss","kitchen_v3/banana_easy/pi05-DROID":"sss","kitchen_v3/banana_easy/pi0-DROID":"sff",
+    "kitchen_v3/banana_hard/MolmoBot":"sss","kitchen_v3/banana_hard/MolmoBot-Img":"sss","kitchen_v3/banana_hard/MolmoBot-Pi0":"sff","kitchen_v3/banana_hard/pi05-DROID":"sfs","kitchen_v3/banana_hard/pi0-DROID":"fff",
+    "kitchen_v3/mouse_easy/MolmoBot":"sss","kitchen_v3/mouse_easy/MolmoBot-Img":"sss","kitchen_v3/mouse_easy/MolmoBot-Pi0":"sss","kitchen_v3/mouse_easy/pi05-DROID":"sss","kitchen_v3/mouse_easy/pi0-DROID":"sss",
+    "kitchen_v3/mouse_hard/MolmoBot":"sss","kitchen_v3/mouse_hard/MolmoBot-Img":"sfs","kitchen_v3/mouse_hard/MolmoBot-Pi0":"ssf","kitchen_v3/mouse_hard/pi05-DROID":"fsf","kitchen_v3/mouse_hard/pi0-DROID":"fsf",
+    "kitchen_v3/clutter_brown/MolmoBot":"fff","kitchen_v3/clutter_brown/MolmoBot-Img":"sss","kitchen_v3/clutter_brown/MolmoBot-Pi0":"fff","kitchen_v3/clutter_brown/pi05-DROID":"ssf","kitchen_v3/clutter_brown/pi0-DROID":"fff",
+    "kitchen_v3/clutter_black/MolmoBot":"fff","kitchen_v3/clutter_black/MolmoBot-Img":"fsf","kitchen_v3/clutter_black/MolmoBot-Pi0":"fff","kitchen_v3/clutter_black/pi05-DROID":"ssf","kitchen_v3/clutter_black/pi0-DROID":"fff",
+
+    "bedroom_v1/pills_towel/MolmoBot":"sss","bedroom_v1/pills_towel/MolmoBot-Img":"fff","bedroom_v1/pills_towel/MolmoBot-Pi0":"ssf","bedroom_v1/pills_towel/pi05-DROID":"fff","bedroom_v1/pills_towel/pi0-DROID":"fff",
+    "bedroom_v1/pills_basket/MolmoBot":"sss","bedroom_v1/pills_basket/MolmoBot-Img":"fff","bedroom_v1/pills_basket/MolmoBot-Pi0":"fff","bedroom_v1/pills_basket/pi05-DROID":"fff","bedroom_v1/pills_basket/pi0-DROID":"fff",
+    "bedroom_v1/roller_towel/MolmoBot":"sss","bedroom_v1/roller_towel/MolmoBot-Img":"ffs","bedroom_v1/roller_towel/MolmoBot-Pi0":"fss","bedroom_v1/roller_towel/pi05-DROID":"fff","bedroom_v1/roller_towel/pi0-DROID":"fff",
+    "bedroom_v1/roller_basket/MolmoBot":"fff","bedroom_v1/roller_basket/MolmoBot-Img":"fss","bedroom_v1/roller_basket/MolmoBot-Pi0":"fff","bedroom_v1/roller_basket/pi05-DROID":"fff","bedroom_v1/roller_basket/pi0-DROID":"fff",
+    "bedroom_v1/banana_towel/MolmoBot":"sss","bedroom_v1/banana_towel/MolmoBot-Img":"sss","bedroom_v1/banana_towel/MolmoBot-Pi0":"fff","bedroom_v1/banana_towel/pi05-DROID":"ffs","bedroom_v1/banana_towel/pi0-DROID":"fff",
+    "bedroom_v1/banana_basket/MolmoBot":"fss","bedroom_v1/banana_basket/MolmoBot-Img":"sss","bedroom_v1/banana_basket/MolmoBot-Pi0":"fff","bedroom_v1/banana_basket/pi05-DROID":"fff","bedroom_v1/banana_basket/pi0-DROID":"fff",
+    "bedroom_v1/ball_towel/MolmoBot":"sss","bedroom_v1/ball_towel/MolmoBot-Img":"sss","bedroom_v1/ball_towel/MolmoBot-Pi0":"ffs","bedroom_v1/ball_towel/pi05-DROID":"fff","bedroom_v1/ball_towel/pi0-DROID":"fff",
+    "bedroom_v1/ball_basket/MolmoBot":"sss","bedroom_v1/ball_basket/MolmoBot-Img":"sfs","bedroom_v1/ball_basket/MolmoBot-Pi0":"fff","bedroom_v1/ball_basket/pi05-DROID":"fff","bedroom_v1/ball_basket/pi0-DROID":"fff",
+    "bedroom_v1/clutter_towel/MolmoBot":"sss","bedroom_v1/clutter_towel/MolmoBot-Img":"sss","bedroom_v1/clutter_towel/MolmoBot-Pi0":"fff","bedroom_v1/clutter_towel/pi05-DROID":"ssf","bedroom_v1/clutter_towel/pi0-DROID":"fff",
+    "bedroom_v1/clutter_basket/MolmoBot":"sss","bedroom_v1/clutter_basket/MolmoBot-Img":"sss","bedroom_v1/clutter_basket/MolmoBot-Pi0":"sfs","bedroom_v1/clutter_basket/pi05-DROID":"fff","bedroom_v1/clutter_basket/pi0-DROID":"fff",
+
+    "robomolmo_princeton/knife_board/MolmoBot":"ssf","robomolmo_princeton/knife_board/MolmoBot-Img":"fss","robomolmo_princeton/knife_board/MolmoBot-Pi0":"sff","robomolmo_princeton/knife_board/pi05-DROID":"fss","robomolmo_princeton/knife_board/pi0-DROID":"fff",
+    "robomolmo_princeton/banana_plate/MolmoBot":"sss","robomolmo_princeton/banana_plate/MolmoBot-Img":"sff","robomolmo_princeton/banana_plate/MolmoBot-Pi0":"sss","robomolmo_princeton/banana_plate/pi05-DROID":"sss","robomolmo_princeton/banana_plate/pi0-DROID":"fff",
+    "robomolmo_princeton/marker_mug/MolmoBot":"ffs","robomolmo_princeton/marker_mug/MolmoBot-Img":"fff","robomolmo_princeton/marker_mug/MolmoBot-Pi0":"fff","robomolmo_princeton/marker_mug/pi05-DROID":"ffs","robomolmo_princeton/marker_mug/pi0-DROID":"fff",
+    "robomolmo_princeton/scissors_bowl/MolmoBot":"ssf","robomolmo_princeton/scissors_bowl/MolmoBot-Img":"ffs","robomolmo_princeton/scissors_bowl/MolmoBot-Pi0":"fff","robomolmo_princeton/scissors_bowl/pi05-DROID":"ffs","robomolmo_princeton/scissors_bowl/pi0-DROID":"fff",
+    "robomolmo_princeton/carrot_basket/MolmoBot":"fss","robomolmo_princeton/carrot_basket/MolmoBot-Img":"sss","robomolmo_princeton/carrot_basket/MolmoBot-Pi0":"fff","robomolmo_princeton/carrot_basket/pi05-DROID":"ffs","robomolmo_princeton/carrot_basket/pi0-DROID":"sff",
+    "robomolmo_princeton/knife_green_bowl/MolmoBot":"fss","robomolmo_princeton/knife_green_bowl/MolmoBot-Img":"fsf","robomolmo_princeton/knife_green_bowl/MolmoBot-Pi0":"ffs","robomolmo_princeton/knife_green_bowl/pi05-DROID":"sff","robomolmo_princeton/knife_green_bowl/pi0-DROID":"fsf",
+    "robomolmo_princeton/screwdriver_blue_bowl/MolmoBot":"sss","robomolmo_princeton/screwdriver_blue_bowl/MolmoBot-Img":"sss","robomolmo_princeton/screwdriver_blue_bowl/MolmoBot-Pi0":"sss","robomolmo_princeton/screwdriver_blue_bowl/pi05-DROID":"sfs","robomolmo_princeton/screwdriver_blue_bowl/pi0-DROID":"fsf",
+    "robomolmo_princeton/mouse_blue_bowl/MolmoBot":"fss","robomolmo_princeton/mouse_blue_bowl/MolmoBot-Img":"ssf","robomolmo_princeton/mouse_blue_bowl/MolmoBot-Pi0":"fss","robomolmo_princeton/mouse_blue_bowl/pi05-DROID":"fsf","robomolmo_princeton/mouse_blue_bowl/pi0-DROID":"fsf",
+    "robomolmo_princeton/mug_bowl/MolmoBot":"sss","robomolmo_princeton/mug_bowl/MolmoBot-Img":"sss","robomolmo_princeton/mug_bowl/MolmoBot-Pi0":"sss","robomolmo_princeton/mug_bowl/pi05-DROID":"sss","robomolmo_princeton/mug_bowl/pi0-DROID":"fff",
+    "robomolmo_princeton/marker_box/MolmoBot":"sff","robomolmo_princeton/marker_box/MolmoBot-Img":"sfs","robomolmo_princeton/marker_box/MolmoBot-Pi0":"fss","robomolmo_princeton/marker_box/pi05-DROID":"ssf","robomolmo_princeton/marker_box/pi0-DROID":"fff",
+  };
+
+  const ENV_NAMES = {workroom_v1:"Workroom", kitchen_v3:"Kitchen", bedroom_v1:"Bedroom", robomolmo_princeton:"Office"};
+  const POLICY_NAMES = {"pi0-DROID":"π₀-DROID", "pi05-DROID":"π₀.₅-DROID"};
+
+  let selectedCell = null;
+
+  document.addEventListener("click", function(e) {
+    const cell = e.target.closest("td.vc");
+    if (!cell) return;
+
+    // Deselect previous
+    if (selectedCell && selectedCell !== cell) selectedCell.classList.remove("selected");
+
+    // Toggle: clicking same cell again closes modal
+    if (selectedCell === cell && document.getElementById("vidModal").classList.contains("open")) {
+      closeModal();
+      return;
+    }
+
+    selectedCell = cell;
+    cell.classList.add("selected");
+
+    const key = cell.dataset.vid;
+    const parts = key.split("/");
+    const env = parts[0], task = parts[1], policy = parts[2];
+    const outcomes = (V[key] || "fff").split("");
+
+    const envName = ENV_NAMES[env] || env;
+    const taskName = task.replace(/_/g," ").replace(/\b\w/g, l => l.toUpperCase());
+    const policyName = POLICY_NAMES[policy] || policy;
+
+    document.getElementById("vidTitle").textContent = `${policyName}  ·  ${taskName}  ·  ${envName}`;
+
+    const promptKey = `${env}/${task}`;
+    const promptText = PROMPTS[promptKey] || "";
+    let promptEl = document.getElementById("vidPrompt");
+    if (!promptEl) {
+      promptEl = document.createElement("p");
+      promptEl.id = "vidPrompt";
+      document.getElementById("vidContainer").parentNode.insertBefore(promptEl, document.getElementById("vidContainer"));
+    }
+    promptEl.innerHTML = promptText ? `<strong>Task:</strong> "${promptText}"` : "";
+    promptEl.style.display = promptText ? "" : "none";
+
+    const container = document.getElementById("vidContainer");
+    container.innerHTML = "";
+    outcomes.forEach((o, i) => {
+      const isSucc = o === "s";
+      const outcome = isSucc ? "succ" : "fail";
+      const url = `${S3}${env}/${task}/${policy}_${i+1}_${outcome}.mp4`;
+      const div = document.createElement("div");
+      div.className = "vid-item " + (isSucc ? "vid-succ" : "vid-fail");
+      div.innerHTML = `<video src="${url}" controls muted loop playsinline autoplay preload="auto"></video>
+        <div class="vid-label">${isSucc ? "✓ Success" : "✗ Failure"}</div>`;
+      container.appendChild(div);
+    });
+
+    document.getElementById("vidModal").classList.add("open");
+  });
+
+  function closeModal() {
+    document.getElementById("vidModal").classList.remove("open");
+    // Pause all videos
+    document.querySelectorAll("#vidContainer video").forEach(v => v.pause());
+    if (selectedCell) { selectedCell.classList.remove("selected"); selectedCell = null; }
+  }
+
+  function closeModalOnBackdrop(e) {
+    if (e.target === document.getElementById("vidModal")) closeModal();
+  }
+
+  document.addEventListener("keydown", e => { if (e.key === "Escape") closeModal(); });
+
+  // Wire up prompt tooltips on task header cells
+  document.querySelectorAll("th[data-task-key]").forEach(th => {
+    const prompt = PROMPTS[th.dataset.taskKey];
+    if (prompt) th.title = `Task: "${prompt}"`;
+  });
 </script>
 
 </body>
