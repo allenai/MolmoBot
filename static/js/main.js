@@ -29,13 +29,6 @@
   window.carouselMove = (dir) => goTo(Math.max(0, Math.min(slides.length - 1, current + dir)));
 })();
 
-function toggleAuthors() {
-  const block = document.getElementById('authorBlock');
-  const btn = document.querySelector('.authors-toggle');
-  block.classList.toggle('open');
-  btn.textContent = block.classList.contains('open') ? '▲ Hide Authors' : '▼ Show Authors';
-}
-
 // ── Video cell click ──────────────────────────────────────────────
 const S3 = "https://ai2-prior-molmobot.s3.us-west-2.amazonaws.com/videos/droid_eval/";
 
