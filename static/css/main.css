@@ -225,6 +225,34 @@ figcaption strong { color: var(--text); }
   z-index: 10;
 }
 
+/* ── ENV TABS ── */
+.env-tab-bar {
+  display: flex;
+  gap: 4px;
+  border-bottom: 2px solid var(--border);
+  margin-bottom: 20px;
+}
+.env-tab {
+  padding: 8px 18px;
+  font-size: 0.88rem;
+  font-weight: 600;
+  background: none;
+  border: none;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -2px;
+  cursor: pointer;
+  color: var(--text-secondary);
+  transition: color 0.15s, border-color 0.15s;
+  border-radius: 4px 4px 0 0;
+}
+.env-tab:hover { color: var(--text); }
+.env-tab.active {
+  color: var(--pink);
+  border-bottom-color: var(--pink);
+}
+.env-tab-panel { display: none; }
+.env-tab-panel.active { display: block; }
+
 /* ── ENV GRID ── */
 .env-grid {
   display: grid;

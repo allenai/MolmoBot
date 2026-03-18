@@ -194,6 +194,33 @@ function copyBibtex() {
   });
 }
 
+// ── Environment tabs ──────────────────────────────────────────────
+document.querySelectorAll('.env-tab').forEach(tab => {
+  tab.addEventListener('click', function() {
+    const env = this.dataset.env;
+    document.querySelectorAll('.env-tab').forEach(t => t.classList.toggle('active', t === this));
+    document.querySelectorAll('.env-tab-panel').forEach(p => {
+      const isActive = p.dataset.env === env;
+      if (!isActive) {
+        p.querySelectorAll('video').forEach(v => v.pause());
+        p.querySelectorAll('.vid-inline').forEach(el => {
+          el.classList.remove('active');
+          el.innerHTML = '';
+        });
+        if (selectedCell && p.contains(selectedCell)) {
+          selectedCell.classList.remove('selected');
+          selectedCell = null;
+        }
+      }
+      p.classList.toggle('active', isActive);
+      if (isActive) {
+        const firstCell = p.querySelector('td.vc');
+        if (firstCell) showVideos(firstCell);
+      }
+    });
+  });
+});
+
 // Wire up prompt tooltips on task header cells
 document.querySelectorAll("th[data-task-key]").forEach(th => {
   const prompt = PROMPTS[th.dataset.taskKey];
