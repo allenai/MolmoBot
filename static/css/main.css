@@ -432,61 +432,33 @@ td.vc {
   transition: background 0.12s;
 }
 td.vc:hover { background: #fce8f3; }
-td.vc.selected { background: var(--pink) !important; color: white !important; font-weight: 700; }
+td.vc.selected { outline: 2px solid var(--pink); outline-offset: -2px; font-weight: 700; }
 
-/* ── VIDEO MODAL ── */
-#vidModal {
+/* ── INLINE VIDEO VIEWER ── */
+.vid-inline {
+  margin-top: 20px;
   display: none;
-  position: fixed;
-  inset: 0;
-  background: rgba(0,0,0,0.55);
-  z-index: 1000;
-  align-items: center;
-  justify-content: center;
-  padding: 20px;
 }
-#vidModal.open { display: flex; }
+.vid-inline.active { display: block; }
 
-.vid-modal-inner {
-  background: white;
-  border-radius: 14px;
-  padding: 28px;
-  max-width: 960px;
-  width: 100%;
-  max-height: 90vh;
-  overflow-y: auto;
-  position: relative;
-}
-
-.vid-modal-header {
+.vid-inline-header {
   display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 20px;
+  align-items: baseline;
   gap: 12px;
+  margin-bottom: 10px;
+  flex-wrap: wrap;
 }
-
-.vid-modal-title {
-  font-size: 1rem;
+.vid-inline-title {
+  font-size: 0.95rem;
   font-weight: 700;
   color: var(--text);
 }
-
-.vid-close {
-  background: none;
-  border: 1.5px solid var(--border);
-  border-radius: 6px;
-  width: 32px;
-  height: 32px;
-  cursor: pointer;
-  font-size: 1.1rem;
-  line-height: 1;
+.vid-inline-prompt {
+  font-size: 0.88rem;
   color: var(--text-secondary);
-  flex-shrink: 0;
 }
-.vid-close:hover { background: var(--border); }
 
-#vidContainer {
+.vid-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 14px;
@@ -510,22 +482,14 @@ td.vc.selected { background: var(--pink) !important; color: white !important; fo
 .vid-item.vid-succ .vid-label { color: #16a34a; }
 .vid-item.vid-fail  .vid-label { color: #dc2626; }
 
-th[data-task-key] {
-  cursor: default;
-}
-
-#vidPrompt {
-  font-size: 0.9rem;
-  color: var(--text-secondary);
-  margin-bottom: 16px;
-}
-
 .vid-hint {
   font-size: 0.75rem;
   color: #aaa;
-  margin-top: 14px;
+  margin-top: 12px;
   text-align: center;
 }
+
+th[data-task-key] { cursor: default; }
 
 /* ── FOOTER ── */
 footer {

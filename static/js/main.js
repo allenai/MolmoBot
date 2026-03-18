@@ -131,22 +131,12 @@ const V = {
 
 const ENV_NAMES = {workroom_v1:"Workroom", kitchen_v3:"Kitchen", bedroom_v1:"Bedroom", robomolmo_princeton:"Office"};
 const POLICY_NAMES = {"pi0-DROID":"π₀-DROID", "pi05-DROID":"π₀.₅-DROID"};
+const ENV_INLINE = {workroom_v1:"workroom", kitchen_v3:"kitchen", bedroom_v1:"bedroom", robomolmo_princeton:"office"};
 
 let selectedCell = null;
 
-document.addEventListener("click", function(e) {
-  const cell = e.target.closest("td.vc");
-  if (!cell) return;
-
-  // Deselect previous
-  if (selectedCell && selectedCell !== cell) selectedCell.classList.remove("selected");
-
-  // Toggle: clicking same cell again closes modal
-  if (selectedCell === cell && document.getElementById("vidModal").classList.contains("open")) {
-    closeModal();
-    return;
-  }
-
+function showVideos(cell) {
+  if (selectedCell) selectedCell.classList.remove("selected");
   selectedCell = cell;
   cell.classList.add("selected");
 
@@ -154,53 +144,60 @@ document.addEventListener("click", function(e) {
   const parts = key.split("/");
   const env = parts[0], task = parts[1], policy = parts[2];
   const outcomes = (V[key] || "fff").split("");
-
-  const envName = ENV_NAMES[env] || env;
   const policyName = POLICY_NAMES[policy] || policy;
+  const promptText = PROMPTS[`${env}/${task}`] || "";
 
-  document.getElementById("vidTitle").textContent = `${policyName}  ·  ${envName}`;
+  // Find the inline viewer for this table
+  const inlineId = "vid-inline-" + ENV_INLINE[env];
+  const inline = document.getElementById(inlineId);
+  if (!inline) return;
 
-  const promptKey = `${env}/${task}`;
-  const promptText = PROMPTS[promptKey] || "";
-  let promptEl = document.getElementById("vidPrompt");
-  if (!promptEl) {
-    promptEl = document.createElement("p");
-    promptEl.id = "vidPrompt";
-    document.getElementById("vidContainer").parentNode.insertBefore(promptEl, document.getElementById("vidContainer"));
-  }
-  promptEl.innerHTML = promptText ? `<strong>Task:</strong> "${promptText}"` : "";
-  promptEl.style.display = promptText ? "" : "none";
+  // Hide all other inline viewers and pause their videos
+  document.querySelectorAll(".vid-inline").forEach(el => {
+    if (el !== inline) {
+      el.querySelectorAll("video").forEach(v => v.pause());
+      el.classList.remove("active");
+      el.innerHTML = "";
+    }
+  });
 
-  const container = document.getElementById("vidContainer");
-  container.innerHTML = "";
-  outcomes.forEach((o, i) => {
+  const promptHtml = promptText
+    ? `<span class="vid-inline-prompt"><strong>Task:</strong> "${promptText}"</span>`
+    : "";
+
+  let vidsHtml = outcomes.map((o, i) => {
     const isSucc = o === "s";
     const outcome = isSucc ? "succ" : "fail";
     const url = `${S3}${env}/${task}/${policy}_${i+1}_${outcome}.mp4`;
-    const div = document.createElement("div");
-    div.className = "vid-item " + (isSucc ? "vid-succ" : "vid-fail");
-    div.innerHTML = `<video src="${url}" controls muted loop playsinline autoplay preload="auto"></video>
-      <div class="vid-label">${isSucc ? "✓ Success" : "✗ Failure"}</div>`;
-    container.appendChild(div);
-  });
+    return `<div class="vid-item ${isSucc ? "vid-succ" : "vid-fail"}">
+      <video src="${url}" controls muted loop playsinline autoplay preload="auto"></video>
+      <div class="vid-label">${isSucc ? "✓ Success" : "✗ Failure"}</div>
+    </div>`;
+  }).join("");
 
-  document.getElementById("vidModal").classList.add("open");
+  inline.innerHTML = `
+    <div class="vid-inline-header">
+      <span class="vid-inline-title">${policyName}</span>
+      ${promptHtml}
+    </div>
+    <div class="vid-grid">${vidsHtml}</div>
+    <p class="vid-hint">All videos are fully autonomous and shown at 1× speed. Videos may take a moment to buffer.</p>
+  `;
+  inline.classList.add("active");
+}
+
+document.addEventListener("click", function(e) {
+  const cell = e.target.closest("td.vc");
+  if (!cell) return;
+  showVideos(cell);
 });
-
-function closeModal() {
-  document.getElementById("vidModal").classList.remove("open");
-  document.querySelectorAll("#vidContainer video").forEach(v => v.pause());
-  if (selectedCell) { selectedCell.classList.remove("selected"); selectedCell = null; }
-}
-
-function closeModalOnBackdrop(e) {
-  if (e.target === document.getElementById("vidModal")) closeModal();
-}
-
-document.addEventListener("keydown", e => { if (e.key === "Escape") closeModal(); });
 
 // Wire up prompt tooltips on task header cells
 document.querySelectorAll("th[data-task-key]").forEach(th => {
   const prompt = PROMPTS[th.dataset.taskKey];
   if (prompt) th.title = `Task: "${prompt}"`;
 });
+
+// Auto-select top-left cell of first table on load
+const firstCell = document.querySelector("td.vc");
+if (firstCell) showVideos(firstCell);

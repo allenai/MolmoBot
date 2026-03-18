@@ -230,7 +230,7 @@
     <p>Each cell shows successes out of 3 trials. <strong>Click any cell</strong> to watch the recordings for that policy &amp; task.</p>
 
     <h3>Workroom</h3>
-    <div class="table-wrap">
+    <div class="table-wrap" id="table-workroom">
       <table>
         <thead>
           <tr>
@@ -265,8 +265,10 @@
       </table>
     </div>
 
+    <div class="vid-inline" id="vid-inline-workroom"></div>
+
     <h3>Kitchen</h3>
-    <div class="table-wrap">
+    <div class="table-wrap" id="table-kitchen">
       <table>
         <thead>
           <tr>
@@ -301,8 +303,10 @@
       </table>
     </div>
 
+    <div class="vid-inline" id="vid-inline-kitchen"></div>
+
     <h3>Bedroom</h3>
-    <div class="table-wrap">
+    <div class="table-wrap" id="table-bedroom">
       <table>
         <thead>
           <tr>
@@ -337,8 +341,10 @@
       </table>
     </div>
 
+    <div class="vid-inline" id="vid-inline-bedroom"></div>
+
     <h3>Office</h3>
-    <div class="table-wrap">
+    <div class="table-wrap" id="table-office">
       <table>
         <thead>
           <tr>
@@ -372,8 +378,9 @@
         </tbody>
       </table>
     </div>
+    <div class="vid-inline" id="vid-inline-office"></div>
     <p class="table-caption">
-      <strong>Pink rows</strong> are our models. Click any data cell to watch the episode recordings.
+      <strong>Pink rows</strong> are our models. Click any cell to watch the episode recordings.
     </p>
   </section>
 
@@ -495,17 +502,6 @@
   MolmoBot · Allen Institute for AI · 2025
 </footer>
 
-<!-- VIDEO MODAL -->
-<div id="vidModal" onclick="closeModalOnBackdrop(event)">
-  <div class="vid-modal-inner">
-    <div class="vid-modal-header">
-      <div class="vid-modal-title" id="vidTitle"></div>
-      <button class="vid-close" onclick="closeModal()" title="Close">✕</button>
-    </div>
-    <div id="vidContainer"></div>
-    <p class="vid-hint">All videos are fully autonomous and shown at 1× speed. Videos may take a moment to buffer.</p>
-  </div>
-</div>
 
 <script src="static/js/main.js"></script>
 
