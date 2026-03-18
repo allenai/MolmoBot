@@ -56,6 +56,7 @@ h1 {
 }
 
 h1 .highlight { color: var(--pink); }
+h1 .zero-o { font-family: "Share Tech Mono", monospace; display: inline-block; transform: scaleX(1.35); }
 
 .venue-badge {
   display: inline-block;
