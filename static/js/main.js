@@ -1,34 +1,3 @@
-// ── Carousel ──────────────────────────────────────────────────────
-(function() {
-  const track = document.querySelector('.carousel-track');
-  if (!track) return;
-  const slides = track.querySelectorAll('.carousel-slide');
-  const dotsContainer = document.getElementById('carouselDots');
-  let current = 0;
-
-  slides.forEach((_, i) => {
-    const dot = document.createElement('button');
-    dot.className = 'carousel-dot' + (i === 0 ? ' active' : '');
-    dot.setAttribute('aria-label', `Slide ${i + 1}`);
-    dot.addEventListener('click', () => goTo(i));
-    dotsContainer.appendChild(dot);
-  });
-
-  function goTo(idx) {
-    slides[current].querySelector('video')?.pause();
-    current = idx;
-    track.style.transform = `translateX(-${current * 100}%)`;
-    dotsContainer.querySelectorAll('.carousel-dot').forEach((d, i) =>
-      d.classList.toggle('active', i === current)
-    );
-    document.getElementById('carouselPrev').disabled = current === 0;
-    document.getElementById('carouselNext').disabled = current === slides.length - 1;
-  }
-
-  goTo(0);
-  window.carouselMove = (dir) => goTo(Math.max(0, Math.min(slides.length - 1, current + dir)));
-})();
-
 // ── Video cell click ──────────────────────────────────────────────
 const S3 = "https://ai2-prior-molmobot.s3.us-west-2.amazonaws.com/videos/droid_eval/";
 
@@ -194,29 +163,38 @@ function copyBibtex() {
   });
 }
 
-// ── Environment tabs ──────────────────────────────────────────────
-document.querySelectorAll('.env-tab').forEach(tab => {
-  tab.addEventListener('click', function() {
-    const env = this.dataset.env;
-    document.querySelectorAll('.env-tab').forEach(t => t.classList.toggle('active', t === this));
-    document.querySelectorAll('.env-tab-panel').forEach(p => {
-      const isActive = p.dataset.env === env;
-      if (!isActive) {
-        p.querySelectorAll('video').forEach(v => v.pause());
-        p.querySelectorAll('.vid-inline').forEach(el => {
-          el.classList.remove('active');
-          el.innerHTML = '';
-        });
-        if (selectedCell && p.contains(selectedCell)) {
-          selectedCell.classList.remove('selected');
-          selectedCell = null;
+// ── Tabs (shared handler, scoped to each .env-tabs group) ─────────
+document.querySelectorAll('.env-tabs').forEach(group => {
+  const tabs   = group.querySelectorAll('.env-tab');
+  const panels = group.querySelectorAll('.env-tab-panel');
+
+  tabs.forEach(tab => {
+    tab.addEventListener('click', function() {
+      // Find which key attribute this group uses (data-env or data-demo)
+      const key   = Object.keys(this.dataset)[0];
+      const value = this.dataset[key];
+
+      tabs.forEach(t => t.classList.toggle('active', t === this));
+      panels.forEach(p => {
+        const isActive = p.dataset[key] === value;
+        if (!isActive) {
+          p.querySelectorAll('video').forEach(v => v.pause());
+          p.querySelectorAll('.vid-inline').forEach(el => {
+            el.classList.remove('active');
+            el.innerHTML = '';
+          });
+          if (selectedCell && p.contains(selectedCell)) {
+            selectedCell.classList.remove('selected');
+            selectedCell = null;
+          }
         }
-      }
-      p.classList.toggle('active', isActive);
-      if (isActive) {
-        const firstCell = p.querySelector('td.vc');
-        if (firstCell) showVideos(firstCell);
-      }
+        p.classList.toggle('active', isActive);
+        if (isActive) {
+          p.querySelectorAll('video[autoplay]').forEach(v => { v.currentTime = 0; v.play(); });
+          const firstCell = p.querySelector('td.vc');
+          if (firstCell) showVideos(firstCell);
+        }
+      });
     });
   });
 });

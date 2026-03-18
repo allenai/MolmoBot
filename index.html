@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <link rel="icon" type="image/png" sizes="32x32" href="static/img/MolmoBotLogo_favicon_32.png" />
-  <title>MolmoBot: Large-Scale Simulation Enables Zero-Shot Manipulation</title>
+  <title>MolmoB0T: Large-Scale Simulation Enables Zero-Shot Manipulation</title>
   <link rel="stylesheet" href="static/css/main.css" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap">
@@ -123,45 +123,42 @@
   <section>
     <div class="section-label">Qualitative Demos</div>
     <h2>Video Demos</h2>
-    <div class="carousel">
-      <div class="carousel-track">
-        <div class="carousel-slide">
-          <video controls muted loop playsinline>
-            <source src="static/videos/camera_demo.mp4" type="video/mp4" />
-          </video>
-          <p class="demo-caption">
-            MolmoBot policies are highly robust to camera pose variation. MolmoBot-Engine
-            employs aggressive camera randomization, requiring resulting policies to learn
-            how to handle a very wide diversity of camera poses. MolmoBot policies are even
-            able to handle adversarial movements of the camera at test time!
-          </p>
-        </div>
-        <div class="carousel-slide">
-          <video controls muted loop playsinline>
-            <source src="static/videos/table_height_demo.mp4" type="video/mp4" />
-          </video>
-          <p class="demo-caption">
-            MolmoBot policies generalize robustly to variation in the environment — including table height,
-            object placement, and scene clutter. This robustness extends to gracefully handling adversarial
-            perturbations applied at test time, such as changing the table height mid-episode.
-          </p>
-        </div>
-        <div class="carousel-slide">
-          <video controls muted loop playsinline>
-            <source src="static/videos/steerability_demo.mp4" type="video/mp4" />
-          </video>
-          <p class="demo-caption">
-            Owing to the high degree of diversity and randomization in MolmoBot-Data, MolmoBot policies
-            are robust to disturbances and highly steerable. SOTA VLAs are often attracted to nearby
-            objects or receptacles, ignoring the task prompt, but MolmoBot policies strongly attend
-            to the task instruction.
-          </p>
-        </div>
+    <div class="env-tabs">
+      <div class="env-tab-bar" role="tablist">
+        <button class="env-tab active" role="tab" data-demo="camera">Camera Robustness</button>
+        <button class="env-tab" role="tab" data-demo="env">Environment Robustness</button>
+        <button class="env-tab" role="tab" data-demo="steer">Steerability</button>
       </div>
-      <div class="carousel-controls">
-        <button class="carousel-btn" id="carouselPrev" onclick="carouselMove(-1)" aria-label="Previous">&#8592;</button>
-        <div class="carousel-dots" id="carouselDots"></div>
-        <button class="carousel-btn" id="carouselNext" onclick="carouselMove(1)" aria-label="Next">&#8594;</button>
+      <div class="env-tab-panel active" data-demo="camera">
+        <video controls muted loop playsinline autoplay style="width:100%;">
+          <source src="static/videos/camera_demo.mp4" type="video/mp4" />
+        </video>
+        <p class="demo-caption">
+          <strong style="color:var(--pink)">MolmoBot policies are highly robust to camera pose variation.</strong> MolmoBot-Engine
+          employs aggressive camera randomization, requiring resulting policies to learn
+          how to handle a very wide diversity of camera poses. MolmoBot policies are even
+          able to handle adversarial movements of the camera at test time!
+        </p>
+      </div>
+      <div class="env-tab-panel" data-demo="env">
+        <video controls muted loop playsinline autoplay style="width:100%;">
+          <source src="static/videos/table_height_demo.mp4" type="video/mp4" />
+        </video>
+        <p class="demo-caption">
+          <strong style="color:var(--pink)">MolmoBot policies generalize robustly to variation in the environment</strong> — including table height, object placement, and scene clutter. This robustness extends to gracefully handling adversarial
+          perturbations applied at test time, such as changing the table height mid-episode.
+        </p>
+      </div>
+      <div class="env-tab-panel" data-demo="steer">
+        <video controls muted loop playsinline autoplay style="width:100%;">
+          <source src="static/videos/steerability_demo.mp4" type="video/mp4" />
+        </video>
+        <p class="demo-caption">
+          Owing to the high degree of diversity and randomization in MolmoBot-Data,
+          <strong style="color:var(--pink)">MolmoBot policies are robust to disturbances and highly steerable</strong>.
+          SOTA VLAs are often attracted to nearby objects or receptacles, ignoring the task prompt,
+          but MolmoBot policies strongly attend to the task instruction.
+        </p>
       </div>
     </div>
   </section>
