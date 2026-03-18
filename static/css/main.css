@@ -491,6 +491,44 @@ td.vc.selected { outline: 2px solid var(--pink); outline-offset: -2px; font-weig
 
 th[data-task-key] { cursor: default; }
 
+/* ── CITATION ── */
+.citation-section {
+  background: var(--surface);
+  border-top: 1px solid var(--border);
+  padding: 40px 24px;
+}
+
+.citation-inner {
+  max-width: var(--max-width);
+  margin: 0 auto;
+}
+
+.bibtex {
+  background: white;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 16px 20px;
+  font-size: 0.8rem;
+  font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+  line-height: 1.6;
+  color: var(--text);
+  overflow-x: auto;
+  white-space: pre;
+  margin-bottom: 10px;
+}
+
+.copy-btn {
+  background: none;
+  border: 1.5px solid var(--border);
+  border-radius: 6px;
+  padding: 5px 14px;
+  font-size: 0.8rem;
+  cursor: pointer;
+  color: var(--text-secondary);
+  transition: background 0.15s, border-color 0.15s, color 0.15s;
+}
+.copy-btn:hover { background: var(--pink); border-color: var(--pink); color: white; }
+
 /* ── FOOTER ── */
 footer {
   text-align: center;

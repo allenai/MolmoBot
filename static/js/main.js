@@ -192,6 +192,15 @@ document.addEventListener("click", function(e) {
   showVideos(cell);
 });
 
+function copyBibtex() {
+  const text = document.getElementById("bibtexBlock").textContent;
+  navigator.clipboard.writeText(text).then(() => {
+    const btn = document.querySelector(".copy-btn");
+    btn.innerHTML = '<i class="fa fa-check"></i> Copied!';
+    setTimeout(() => { btn.innerHTML = '<i class="fa fa-copy"></i> Copy'; }, 2000);
+  });
+}
+
 // Wire up prompt tooltips on task header cells
 document.querySelectorAll("th[data-task-key]").forEach(th => {
   const prompt = PROMPTS[th.dataset.taskKey];
