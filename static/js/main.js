@@ -203,3 +203,176 @@ document.querySelectorAll("th[data-task-key]").forEach(th => {
 // Auto-select top-left cell of first table on load
 const firstCell = document.querySelector("td.vc");
 if (firstCell) showVideos(firstCell);
+
+// ── DROID Results Interactive Bar Chart ───────────────────────────
+(function() {
+  const canvas = document.getElementById('droid-results-chart');
+  if (!canvas) return;
+  const tooltip = document.getElementById('droid-chart-tooltip');
+  const ctx = canvas.getContext('2d');
+
+  const data = [
+    { label: 'MolmoBot',    value: 79.2, lo: 74.2, hi: 83.3, ours: true  },
+    { label: 'MolmoBot-Img',value: 72.5, lo: 67.5, hi: 77.5, ours: true  },
+    { label: 'MolmoBot-Pi0',value: 46.7, lo: 41.7, hi: 51.7, ours: true  },
+    { label: 'π₀.₅-DROID',  value: 39.2, lo: 33.3, hi: 45.0, ours: false },
+    { label: 'π₀-DROID',    value:  9.2, lo:  5.8, hi: 13.3, ours: false },
+  ];
+
+  const PINK      = '#e8529a';
+  const PINK_DARK = '#c03a7a';
+  const GRAY      = '#b0b0b0';
+  const GRAY_DARK = '#888888';
+  const MARGIN    = { top: 24, right: 24, bottom: 76, left: 52 };
+
+  let cssW = 0, cssH = 320, dpr = 1;
+  let barRects = [];
+  let hoveredIdx = -1;
+
+  function resize() {
+    dpr = window.devicePixelRatio || 1;
+    cssW = Math.min(canvas.parentElement.clientWidth, 640);
+    cssH = 320;
+    canvas.style.width  = cssW + 'px';
+    canvas.style.height = cssH + 'px';
+    canvas.width  = cssW * dpr;
+    canvas.height = cssH * dpr;
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  }
+
+  function draw(hovIdx) {
+    ctx.clearRect(0, 0, cssW, cssH);
+
+    const chartW = cssW - MARGIN.left - MARGIN.right;
+    const chartH = cssH - MARGIN.top  - MARGIN.bottom;
+    const yScale = v => MARGIN.top + chartH * (1 - v / 100);
+
+    const n      = data.length;
+    const barW   = (chartW / n) * 0.58;
+    const barStep = chartW / n;
+
+    // Gridlines + y-axis labels
+    ctx.setLineDash([]);
+    for (let g = 0; g <= 100; g += 20) {
+      const y = yScale(g);
+      ctx.strokeStyle = '#e8e8e8';
+      ctx.lineWidth   = 1;
+      ctx.beginPath();
+      ctx.moveTo(MARGIN.left, y);
+      ctx.lineTo(MARGIN.left + chartW, y);
+      ctx.stroke();
+
+      ctx.fillStyle  = '#888';
+      ctx.font       = '11px sans-serif';
+      ctx.textAlign  = 'right';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(g + '%', MARGIN.left - 6, y);
+    }
+
+    // Axis lines
+    ctx.strokeStyle = '#ccc';
+    ctx.lineWidth   = 1;
+    ctx.beginPath();
+    ctx.moveTo(MARGIN.left, MARGIN.top);
+    ctx.lineTo(MARGIN.left, yScale(0));
+    ctx.lineTo(MARGIN.left + chartW, yScale(0));
+    ctx.stroke();
+
+    barRects = [];
+
+    data.forEach((d, i) => {
+      const cx   = MARGIN.left + barStep * i + barStep / 2;
+      const x    = cx - barW / 2;
+      const yTop = yScale(d.value);
+      const h    = yScale(0) - yTop;
+      const isHovered = i === hovIdx;
+
+      barRects.push({ x, y: yTop, w: barW, h });
+
+      // Bar
+      ctx.fillStyle = d.ours
+        ? (isHovered ? PINK_DARK : PINK)
+        : (isHovered ? GRAY_DARK : GRAY);
+      ctx.fillRect(x, yTop, barW, h);
+
+      // Error bar
+      const yLo  = yScale(d.lo);
+      const yHi  = yScale(d.hi);
+      const capW = barW * 0.28;
+      ctx.strokeStyle = '#333';
+      ctx.lineWidth   = isHovered ? 2 : 1.5;
+      ctx.beginPath();
+      ctx.moveTo(cx, yLo);
+      ctx.lineTo(cx, yHi);
+      ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(cx - capW/2, yLo); ctx.lineTo(cx + capW/2, yLo); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(cx - capW/2, yHi); ctx.lineTo(cx + capW/2, yHi); ctx.stroke();
+
+      // Value label above the upper CI whisker
+      ctx.fillStyle    = '#333';
+      ctx.font         = isHovered ? 'bold 12px sans-serif' : '12px sans-serif';
+      ctx.textAlign    = 'center';
+      ctx.textBaseline = 'bottom';
+      ctx.fillText(d.value + '%', cx, yHi - 4);
+
+      // X-axis label (rotated)
+      ctx.fillStyle    = isHovered ? '#111' : '#444';
+      ctx.font         = isHovered ? 'bold 12px sans-serif' : '12px sans-serif';
+      ctx.textAlign    = 'right';
+      ctx.textBaseline = 'middle';
+      ctx.save();
+      ctx.translate(cx, yScale(0) + 10);
+      ctx.rotate(-Math.PI / 6);
+      ctx.fillText(d.label, 0, 0);
+      ctx.restore();
+    });
+  }
+
+  // Tooltip positioning relative to the wrapper div
+  canvas.addEventListener('mousemove', function(e) {
+    const rect = canvas.getBoundingClientRect();
+    const scaleX = cssW / rect.width;
+    const mx = (e.clientX - rect.left) * scaleX;
+    const my = (e.clientY - rect.top)  * scaleX;
+
+    let found = -1;
+    barRects.forEach(({ x, y, w, h }, i) => {
+      if (mx >= x && mx <= x + w && my >= y && my <= y + h) found = i;
+    });
+
+    if (found !== hoveredIdx) {
+      hoveredIdx = found;
+      draw(hoveredIdx);
+    }
+
+    if (found >= 0) {
+      const d = data[found];
+      tooltip.textContent = `${d.value}%  (95% CI: ${d.lo}%–${d.hi}%)`;
+      tooltip.style.display = 'block';
+      // Position relative to canvas element, clamped to stay within wrapper
+      const relX   = e.clientX - rect.left;
+      const relY   = e.clientY - rect.top;
+      const tipW   = tooltip.offsetWidth;
+      const wrapW  = canvas.parentElement.clientWidth;
+      let tipLeft  = relX + 14;
+      if (tipLeft + tipW > wrapW) tipLeft = relX - tipW - 10;
+      if (tipLeft < 0) tipLeft = 4;
+      tooltip.style.left = tipLeft + 'px';
+      tooltip.style.top  = (relY - 36) + 'px';
+      canvas.style.cursor = 'default';
+    } else {
+      tooltip.style.display = 'none';
+      canvas.style.cursor = '';
+    }
+  });
+
+  canvas.addEventListener('mouseleave', function() {
+    hoveredIdx = -1;
+    tooltip.style.display = 'none';
+    draw(-1);
+  });
+
+  resize();
+  draw(-1);
+  window.addEventListener('resize', function() { resize(); draw(hoveredIdx); });
+})();

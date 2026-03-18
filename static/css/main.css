@@ -199,6 +199,32 @@ figcaption strong { color: var(--text); }
 
 .fig-hero { margin-bottom: 8px; }
 
+/* ── Interactive chart ── */
+.chart-wrap {
+  position: relative;
+  max-width: min(640px, 100%);
+  margin-left: auto;
+  margin-right: auto;
+  overflow: hidden;
+}
+#droid-results-chart {
+  display: block;
+  width: 100%;
+}
+.chart-tooltip {
+  position: absolute;
+  background: rgba(26, 26, 26, 0.88);
+  color: #fff;
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  pointer-events: none;
+  white-space: nowrap;
+  display: none;
+  z-index: 10;
+}
+
 /* ── ENV GRID ── */
 .env-grid {
   display: grid;

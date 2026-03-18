@@ -225,7 +225,10 @@
       π₀.₅-DROID (39.2%), a strong baseline trained on large-scale real-world demonstrations.
     </p>
     <figure>
-      <img src="static/img/real_results_droid_all.png" alt="Real-world DROID evaluation results bar chart" style="max-width:min(640px, 100%);" />
+      <div class="chart-wrap">
+        <canvas id="droid-results-chart"></canvas>
+        <div id="droid-chart-tooltip" class="chart-tooltip"></div>
+      </div>
       <figcaption>
         MolmoBot policies exhibit strong zero-shot sim-to-real performance across real-world
         DROID evaluations, outperforming SOTA policies trained on large-scale real-world demonstrations.
