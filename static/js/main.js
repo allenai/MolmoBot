@@ -191,7 +191,7 @@ document.querySelectorAll('.env-tabs').forEach(group => {
         p.classList.toggle('active', isActive);
         if (isActive) {
           p.querySelectorAll('video[autoplay]').forEach(v => { v.currentTime = 0; v.play(); });
-          const firstCell = p.querySelector('td.vc');
+          const firstCell = bottomLeftCell(p);
           if (firstCell) showVideos(firstCell);
         }
       });
@@ -205,9 +205,16 @@ document.querySelectorAll("th[data-task-key]").forEach(th => {
   if (prompt) th.title = `Task: "${prompt}"`;
 });
 
-// Auto-select top-left cell of first table on load
-const firstCell = document.querySelector("td.vc");
-if (firstCell) showVideos(firstCell);
+// Returns the first td.vc in the last row that has one (bottom-left)
+function bottomLeftCell(scope) {
+  const rows = [...scope.querySelectorAll('tr')].filter(r => r.querySelector('td.vc'));
+  return rows.length ? rows[rows.length - 1].querySelector('td.vc') : null;
+}
+
+// Auto-select bottom-left cell of the initially active table on load
+const initPanel = document.querySelector('.results-tabs .env-tab-panel.active');
+const initCell = initPanel ? bottomLeftCell(initPanel) : null;
+if (initCell) showVideos(initCell);
 
 // ── DROID Results Interactive Bar Chart ───────────────────────────
 (function() {
@@ -217,11 +224,11 @@ if (firstCell) showVideos(firstCell);
   const ctx = canvas.getContext('2d');
 
   const data = [
-    { label: 'MolmoBot',    value: 79.2, lo: 74.2, hi: 83.3, ours: true  },
-    { label: 'MolmoBot-Img',value: 72.5, lo: 67.5, hi: 77.5, ours: true  },
-    { label: 'MolmoBot-Pi0',value: 46.7, lo: 41.7, hi: 51.7, ours: true  },
-    { label: 'π₀.₅-DROID',  value: 39.2, lo: 33.3, hi: 45.0, ours: false },
     { label: 'π₀-DROID',    value:  9.2, lo:  5.8, hi: 13.3, ours: false },
+    { label: 'π₀.₅-DROID',  value: 39.2, lo: 33.3, hi: 45.0, ours: false },
+    { label: 'MolmoBot-Pi0',value: 46.7, lo: 41.7, hi: 51.7, ours: true  },
+    { label: 'MolmoBot-Img',value: 72.5, lo: 67.5, hi: 77.5, ours: true  },
+    { label: 'MolmoBot',    value: 79.2, lo: 74.2, hi: 83.3, ours: true  },
   ];
 
   const PINK      = '#e8529a';
