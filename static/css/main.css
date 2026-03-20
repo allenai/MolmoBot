@@ -253,6 +253,17 @@ figcaption strong { color: var(--text); }
 .env-tab-panel { display: none; }
 .env-tab-panel.active { display: block; }
 
+.video-letterbox {
+  aspect-ratio: 16 / 9;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.video-letterbox video {
+  height: 100%;
+  width: auto;
+}
+
 /* ── ENV GRID ── */
 .env-grid {
   display: grid;

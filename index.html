@@ -128,6 +128,8 @@
         <button class="env-tab active" role="tab" data-demo="camera">Camera Robustness</button>
         <button class="env-tab" role="tab" data-demo="env">Environment Robustness</button>
         <button class="env-tab" role="tab" data-demo="steer">Steerability</button>
+        <button class="env-tab" role="tab" data-demo="door">Mobile Door Opening</button>
+        <button class="env-tab" role="tab" data-demo="mobilepick">Mobile Picking</button>
       </div>
       <div class="env-tab-panel active" data-demo="camera">
         <video controls muted loop playsinline autoplay style="width:100%;">
@@ -158,6 +160,28 @@
           <strong style="color:var(--pink)">MolmoBot policies are robust to disturbances and highly steerable</strong>.
           SOTA VLAs are often attracted to nearby objects or receptacles, ignoring the task prompt,
           but MolmoBot policies strongly attend to the task instruction.
+        </p>
+      </div>
+      <div class="env-tab-panel" data-demo="door">
+        <div class="video-letterbox">
+          <video controls muted loop playsinline autoplay>
+            <source src="static/videos/rby1_door.mp4" type="video/mp4" />
+          </video>
+        </div>
+        <p class="demo-caption">
+          <strong style="color:var(--pink)">MolmoBot can open doors zero-shot on a mobile bimanual platform</strong>,
+          demonstrating a high degree of simultaneous coordination between mobility and constrained manipulation.
+        </p>
+      </div>
+      <div class="env-tab-panel" data-demo="mobilepick">
+        <div class="video-letterbox">
+          <video controls muted loop playsinline autoplay>
+            <source src="static/videos/rby1_pick.mp4" type="video/mp4" />
+          </video>
+        </div>
+        <p class="demo-caption">
+          <strong style="color:var(--pink)">MolmoBot can coordinate many degrees of freedom simultaneously</strong>
+          to achieve robust manipulation.
         </p>
       </div>
     </div>
