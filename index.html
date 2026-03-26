@@ -108,7 +108,7 @@
       <p style="margin-top:12px;">
         We introduce <strong>MolmoBot-Engine</strong>, a fully open-source pipeline for procedural data generation
         across robots, tasks, and diverse simulated environments in MolmoSpaces. With it, we release
-        <strong>MolmoBot-Data</strong>, a dataset of 1.8 million expert trajectories for articulated object
+        <strong>MolmoBot-Data</strong>, a dataset of 1.7 million expert trajectories for articulated object
         manipulation and pick-and-place tasks. We train three policy classes: <strong>MolmoBot</strong>
         (a Molmo2-based VLM with a flow-matching action head), <strong>MolmoBot-Pi0</strong> (replicating the
         π₀ architecture for controlled comparison), and <strong>MolmoBot-SPOC</strong> (a lightweight policy
@@ -209,16 +209,16 @@
       <strong>MolmoBot-Engine</strong> is an open-source procedural data generation pipeline built on
       <a href="https://github.com/allenai/molmospaces" target="_blank"><strong>MolmoSpaces</strong></a>, a photorealistic simulation platform with 94,000+ indoor environments.
       It automatically generates expert trajectories via task-and-motion planning with aggressive randomization
-      of objects, lighting, and camera poses — producing <strong>MolmoBot-Data</strong>, 1.8M demonstrations
-      totaling 5,800+ hours of robot experience across 8 task types.
+      of objects, lighting, and camera poses — producing <strong>MolmoBot-Data</strong>, 1.7M demonstrations
+      totaling 5,700+ hours of robot experience across 8 task types.
     </p>
     <div class="stats-strip">
-      <div class="stat-card"><div class="num">1.8M</div><div class="lbl">Expert Demonstrations</div></div>
+      <div class="stat-card"><div class="num">1.7M</div><div class="lbl">Expert Demonstrations</div></div>
       <div class="stat-card"><div class="num">94k+</div><div class="lbl">Unique Environments</div></div>
       <div class="stat-card"><div class="num">11k+</div><div class="lbl">Unique Objects</div></div>
       <div class="stat-card"><div class="num">9k+</div><div class="lbl">Unique Receptacles</div></div>
       <div class="stat-card"><div class="num">8</div><div class="lbl">Task Types</div></div>
-      <div class="stat-card"><div class="num">5,817 h</div><div class="lbl">Total Data</div></div>
+      <div class="stat-card"><div class="num">5,704 h</div><div class="lbl">Total Data</div></div>
     </div>
     <div class="demo-list" style="margin-top: 32px;">
       <div class="demo-card">
@@ -460,57 +460,57 @@
         <tbody>
           <tr>
             <td>π₀.₅</td>
-            <td>36.4</td><td>9.3</td><td>14.0</td><td>12.8</td>
-            <td>20.0</td><td>35.5</td><td>16.2</td><td>20.6</td>
+            <td>18.1</td><td>6.4</td><td>7.0</td><td>8.0</td>
+            <td>11.7</td><td>8.2</td><td>10.4</td><td>10.0</td>
           </tr>
           <tr>
             <td>π₀.₅-Finetune</td>
-            <td>47.0</td><td>20.5</td><td>24.0</td><td>28.5</td>
-            <td>46.0</td><td>36.9</td><td>53.0</td><td>36.6</td>
+            <td>48.0</td><td>28.3</td><td>25.8</td><td>29.7</td>
+            <td>43.5</td><td class="best">28.4</td><td>48.3</td><td>36.0</td>
           </tr>
           <tr>
             <td>StereoVLA</td>
-            <td>6.3</td><td>4.3</td><td>1.1</td><td>N/A</td>
-            <td>0</td><td>0</td><td>0</td><td>—</td>
+            <td>6.6</td><td>4.3</td><td>1.1</td><td>N/A</td>
+            <td>0</td><td>N/A</td><td>0</td><td>—</td>
           </tr>
           <tr>
             <td>LAP-VLA</td>
-            <td>12.6</td><td>0.5</td><td>0.5</td><td>0</td>
-            <td>2.2</td><td>10.1</td><td>0</td><td>3.7</td>
+            <td>19.4</td><td>2.4</td><td>3.1</td><td>2.7</td>
+            <td>3.8</td><td>6.5</td><td>3.1</td><td>4.8</td>
           </tr>
           <tr>
             <td>X-VLA</td>
-            <td>6.0</td><td>5.8</td><td>0.9</td><td>0.2</td>
-            <td>0</td><td>0</td><td>0</td><td>1.8</td>
+            <td>3.3</td><td>0.5</td><td>0.7</td><td>0.8</td>
+            <td>0.1</td><td>1.9</td><td>0.9</td><td>1.2</td>
           </tr>
           <tr class="separator-row"><td colspan="9"></td></tr>
           <tr class="ours">
             <td>MolmoBot-Pi0</td>
-            <td>65.5</td><td>30.5</td><td>32.0</td><td>36.0</td>
-            <td>41.5</td><td>41.8</td><td>42.5</td><td>41.4</td>
+            <td>66.2</td><td>35.7</td><td>33.3</td><td>39.8</td>
+            <td>44.7</td><td>24.7</td><td>46.2</td><td>41.5</td>
           </tr>
           <tr class="ours">
             <td>MolmoBot-Img</td>
-            <td class="best">92.8</td><td class="best">67.0</td><td>63.0</td><td class="best">62.5</td>
-            <td class="best">67.0</td><td>47.5</td><td>65.0</td><td class="best">66.4</td>
+            <td>92.2</td><td>63.5</td><td>61.4</td><td>62.1</td>
+            <td>63.0</td><td>21.0</td><td class="best">67.8</td><td>61.6</td>
           </tr>
           <tr class="ours">
             <td><strong>MolmoBot (F=2)</strong></td>
-            <td>92.0</td><td>63.0</td><td class="best">66.0</td><td>61.0</td>
-            <td>60.0</td><td class="best">55.0</td><td class="best">68.0</td><td class="best">66.4</td>
+            <td class="best">93.5</td><td class="best">66.8</td><td class="best">64.0</td><td class="best">63.7</td>
+            <td class="best">66.4</td><td>26.4</td><td class="best">67.8</td><td class="best">64.1</td>
           </tr>
           <tr class="ours">
             <td>MolmoBot (F=3)</td>
-            <td>91.9</td><td>61.0</td><td>63.5</td><td>60.0</td>
-            <td>62.5</td><td>46.5</td><td>65.5</td><td>64.4</td>
+            <td>91.3</td><td>63.8</td><td>59.0</td><td>62.7</td>
+            <td>65.4</td><td>28.3</td><td>66.1</td><td>62.4</td>
           </tr>
         </tbody>
       </table>
     </div>
     <p class="table-caption">
       <strong>Pink rows</strong> are our models. Bold values are best per column.
-      MolmoBot variants substantially outperform all baselines, with MolmoBot-Img and MolmoBot (F=2)
-      both achieving <strong>66.4% average</strong> vs. 36.6% for the strongest baseline (π₀.₅-Finetune).
+      MolmoBot variants substantially outperform all baselines, with MolmoBot (F=2)
+      achieving <strong>64.1% average</strong> vs. 36.0% for the strongest baseline (π₀.₅-Finetune).
     </p>
   </section>
 
