@@ -522,6 +522,12 @@ footer a { color: var(--pink); text-decoration: none; }
 
 @media (max-width: 600px) {
   .env-grid { grid-template-columns: repeat(2, 1fr); }
-  h1 { font-size: 1.5rem; }
+  h1 { font-size: 1.5rem; text-align: center; }
   .logo { width: 52px; height: 52px; }
+}
+
+.mobile-br { display: none; }
+@media (max-width: 600px) {
+  .mobile-br { display: block; }
+  .desktop-br { display: none; }
 }
