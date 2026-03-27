@@ -231,8 +231,13 @@ figcaption strong { color: var(--text); }
   gap: 4px;
   border-bottom: 2px solid var(--border);
   margin-bottom: 20px;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
 }
+.env-tab-bar::-webkit-scrollbar { display: none; }
 .env-tab {
+  flex-shrink: 0;
   padding: 8px 18px;
   font-size: 0.88rem;
   font-weight: 600;
