@@ -41,7 +41,7 @@ class SPOCTrainingConfig(BaseModel):
 
     # Wandb logging configuration
     wandb_logging: bool = True
-    wandb_project: str = "whirl-spoc-training"
+    wandb_project: str = "spoc-training"
     wandb_entity: Optional[str] = "anonymous"
 
     # Sensor configuration

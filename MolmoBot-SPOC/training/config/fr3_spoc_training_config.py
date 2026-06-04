@@ -36,7 +36,7 @@ class SPOCDroidPickPlaceTrainingConfig(SPOCTrainingConfig):
 
     # Wandb logging configuration
     wandb_logging: bool = True
-    wandb_project: str = "whirl-spoc-training"
+    wandb_project: str = "spoc-training"
 
     policy_config: SPOCDroidPickPlacePolicyConfig = SPOCDroidPickPlacePolicyConfig(
         model_str="SpocLlamaModelWBinnedActionFrankaPickPlaceXXL",

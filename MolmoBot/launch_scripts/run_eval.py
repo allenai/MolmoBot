@@ -83,7 +83,7 @@ def main():
     )
     args = parser.parse_args()
 
-    # Resolve module:ClassName string to actual class so mujoco-thor uses __name__
+    # Resolve module:ClassName string to actual class so the sim package uses __name__
     # (not the full "module:ClassName" string) when constructing the output directory.
     eval_config_cls = args.eval_config_cls
     if isinstance(eval_config_cls, str) and ":" in eval_config_cls:

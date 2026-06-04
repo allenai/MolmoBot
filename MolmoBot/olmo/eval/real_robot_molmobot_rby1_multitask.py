@@ -1,4 +1,4 @@
-"""Isolated MolmoBot RBY1 multitask policy — NO mujoco-thor dependencies.
+"""Isolated MolmoBot RBY1 multitask policy — no simulator dependencies.
 
 Extends the door-only isolated policy with torso control, optional conditioning
 image, and state_spec/state_indices for torso qpos extraction.

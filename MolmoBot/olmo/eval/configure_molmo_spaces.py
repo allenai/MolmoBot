@@ -270,7 +270,7 @@ class FrankaState8ClampConfig(JsonBenchmarkEvalConfig):
         # Disable action noise for evaluation
         self.robot_config.action_noise_config.enabled = False
         # Set command modes based on policy action keys
-        # RMH note: if you train with non-delta-joint actions, this will need adjustment
+        # note: if you train with non-delta-joint actions, this will need adjustment
         for mg, action_key in self.policy_config.action_keys.items():
             if action_key == "joint_pos_rel" or action_key == "delta_actions":
                 if mg == "base":
@@ -293,7 +293,7 @@ class FrankaState8ClampAbsPosConfig(JsonBenchmarkEvalConfig):
         # Disable action noise for evaluation
         self.robot_config.action_noise_config.enabled = False
         # Set command modes based on policy action keys
-        # RMH note: if you train with non-delta-joint actions, this will need adjustment
+        # note: if you train with non-delta-joint actions, this will need adjustment
         for mg, action_key in self.policy_config.action_keys.items():
             if action_key == "joint_pos_rel" or action_key == "delta_actions":
                 if mg == "base":
@@ -318,7 +318,7 @@ class FrankaAbsPosRandomCamConfig(JsonBenchmarkEvalConfig):
         # Disable action noise for evaluation
         self.robot_config.action_noise_config.enabled = False
         # Set command modes based on policy action keys
-        # RMH note: if you train with non-delta-joint actions, this will need adjustment
+        # note: if you train with non-delta-joint actions, this will need adjustment
         for mg, action_key in self.policy_config.action_keys.items():
             if action_key == "joint_pos_rel" or action_key == "delta_actions":
                 if mg == "base":
@@ -329,7 +329,7 @@ class FrankaAbsPosRandomCamConfig(JsonBenchmarkEvalConfig):
                     self.robot_config.command_mode["gripper"] = "joint_rel_position"
 
 
-# RMH note: this is the one you actually invoke for the eval launch
+# note: this is the one you actually invoke for the eval launch
 class SynthVLAFrankaBenchmarkOriginalEvalConfig(JsonBenchmarkEvalConfig):
     """
     Minimal benchmark-only eval config for SynthVLA Franka pick-and-place.
@@ -352,7 +352,7 @@ class SynthVLAFrankaBenchmarkOriginalEvalConfig(JsonBenchmarkEvalConfig):
         # Disable action noise for evaluation
         self.robot_config.action_noise_config.enabled = False
         # Set command modes based on policy action keys
-        # RMH note: if you train with non-delta-joint actions, this will need adjustment
+        # note: if you train with non-delta-joint actions, this will need adjustment
         for mg, action_key in self.policy_config.action_keys.items():
             if action_key == "joint_pos_rel" or action_key == "delta_actions":
                 if mg == "base":

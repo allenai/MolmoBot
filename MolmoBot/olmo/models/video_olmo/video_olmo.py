@@ -538,12 +538,11 @@ class VideoOlmo(ModelBase):
             all_rope_buffer_keys = []
             for block_idx, rope_buffers in self.get_rope_buffers_for_cp(
                 S, self.device
-                ## the following is what olmo-core does and I don't understand why..
+                ## the following is what olmo-core does and is not obvious why..
                 ## the buffers are cached on the cuda device with the associated rank anyway.
                 ## we're requesting them on cpu, which means they are moved to cpu and then moved back
                 ## to gpu later if you look at 30 lines or so below this.
-                ## TODO: Reza: ask Pete about this
-                # S, torch.device("cpu") 
+                # S, torch.device("cpu")
             ).items():
                 if rope_buffers is not None:
                     if rope_buffers.pos_sin is not None:

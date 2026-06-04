@@ -376,7 +376,7 @@ class UlyssesAttention(torch.nn.Module):
             * output (Tensor): context output
         """
         # TODO Merge three alltoall calls into one
-        # TODO (Reza): change the api on the megatron-deepspeed side so that we only receive all data (q,k, and v) together!
+        # TODO: change the api on the megatron-deepspeed side so that we only receive all data (q,k, and v) together!
         # in shape : e.g.,  [s/p:h:]
         # (bs, seq_len/N, head_cnt, head_size) -> (bs, seq_len, head_cnt/N, head_size)
 

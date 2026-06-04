@@ -12,7 +12,7 @@ TIMESTAMP = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
 
 
 class DroidPickPlaceEvalConfig(JsonBenchmarkEvalConfig):
-    wandb_project: str = "mujoco-thor-opening-eval"
+    wandb_project: str = "opening-eval"
     use_wandb: bool = True
     use_passive_viewer: bool = False
     camera_names: list[str] = ["exo_camera_1", "wrist_camera"]

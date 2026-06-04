@@ -14,7 +14,7 @@ class SPOCPolicyConfig(BasePolicyConfig):
 
     model_str: str
     model_pkg: SPOCModelPackage
-    wandb_source_project: str = "whirl-spoc-training"
+    wandb_source_project: str = "spoc-training"
     training_run_id: str | None = None
     ckpt_step: int | None = None
     checkpoint_dir: str | None = None
@@ -56,7 +56,7 @@ class SPOCRBY1ArticulatedManipPolicyConfig(SPOCPolicyConfig):
     model_pkg: SPOCModelPackage = REGISTERED_MODELS[
         "SpocLlamaModelWBinnedActionRBY1ArticulatedManipXXL"
     ]
-    wandb_source_project: str = "whirl-spoc-training"
+    wandb_source_project: str = "spoc-training"
     camera_names: list[str] = ["head_camera", "wrist_camera_r", "wrist_camera_l"]
     action_move_group_names: list[str] = [
         "base",
@@ -97,7 +97,7 @@ class SPOCRBY1RigidManipPolicyConfig(SPOCPolicyConfig):
     model_pkg: SPOCModelPackage = REGISTERED_MODELS[
         "SpocLlamaModelWBinnedActionRBY1RigidManipXXL"
     ]
-    wandb_source_project: str = "whirl-spoc-training"
+    wandb_source_project: str = "spoc-training"
     camera_names: list[str] = ["head_camera", "wrist_camera_r", "wrist_camera_l"]
     action_move_group_names: list[str] = [
         "base",
@@ -134,7 +134,7 @@ class SPOCDroidPickPlacePolicyConfig(SPOCPolicyConfig):
     model_pkg: SPOCModelPackage = REGISTERED_MODELS[
         "SpocLlamaModelWBinnedActionFrankaPickPlaceXXL"
     ]
-    wandb_source_project: str = "whirl-spoc-training"
+    wandb_source_project: str = "spoc-training"
     camera_names: list[str] = [
         "droid_shoulder_light_randomization",
         "wrist_camera_zed_mini",

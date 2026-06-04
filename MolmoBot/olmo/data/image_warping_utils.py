@@ -1,7 +1,6 @@
 """GoPro fisheye warping utilities for SynthVLA training.
 
-Self-contained copy of warping logic from whirl/utils/image_warping_utils.py
-and whirl/utils/transformation_util.py (ApplyFullFisheyeWarping), adapted to
+Self-contained warping logic (ApplyFullFisheyeWarping), adapted to
 avoid cross-package imports. Names kept consistent with SPOC preprocessing.
 
 Pipeline (matching SPOC preprocessors.py update):
@@ -23,7 +22,7 @@ import numpy as np
 import torch
 import torch.nn.functional as F
 
-# GoPro camera constants (same as whirl/utils/constants/camera_constants.py)
+# GoPro camera constants.
 # Used as defaults; warping now runs at native 4:3 resolution, not fixed 640x480.
 GOPRO_CAMERA_HEIGHT = 480
 GOPRO_CAMERA_WIDTH = 640

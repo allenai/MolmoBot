@@ -1,7 +1,6 @@
-"""Isolated MolmoBot RBY1 door opening policy — NO mujoco-thor dependencies.
+"""Isolated MolmoBot RBY1 door opening policy — no simulator dependencies.
 
 Standalone policy for WebSocket serving to real robots.
-Pattern follows whirl/policy/door_opening_policy_isolated.py.
 
 Duck-types the InferencePolicy interface expected by WebsocketPolicyServer:
     prepare_model(), obs_to_model_input(), inference_model(), model_output_to_action()
@@ -76,7 +75,7 @@ class MolmoBotRBY1DoorPolicyConfig(BaseModel):
 
 
 class MolmoBotRBY1DoorPolicy:
-    """Standalone MolmoBot policy for RBY1 door opening — no mujoco-thor deps.
+    """Standalone MolmoBot policy for RBY1 door opening — no simulator deps.
 
     Uses action buffering: predicts action_horizon actions per inference call,
     executes execute_horizon before refreshing the buffer.

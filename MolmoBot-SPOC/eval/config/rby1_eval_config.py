@@ -14,7 +14,7 @@ TIMESTAMP = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
 
 
 class RBY1EvalBaseConfig(JsonBenchmarkEvalConfig):
-    wandb_project: str = "mujoco-thor-opening-eval"
+    wandb_project: str = "opening-eval"
     use_wandb: bool = True
     use_passive_viewer: bool = False
     viewer_cam_dict: dict = {"camera": "robot_0/camera_follower"}

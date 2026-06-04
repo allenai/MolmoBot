@@ -41,7 +41,7 @@ class SPOCRBY1ArticulatedManipTrainingConfig(SPOCTrainingConfig):
 
     # Wandb logging configuration
     wandb_logging: bool = True
-    wandb_project: str = "whirl-spoc-training"
+    wandb_project: str = "spoc-training"
     wandb_entity: Optional[str] = None
 
     extra_tag: str = "rby1_articulated"
@@ -84,7 +84,7 @@ class SPOCRBY1RigidManipTrainingConfig(SPOCTrainingConfig):
 
     # Wandb logging configuration
     wandb_logging: bool = True
-    wandb_project: str = "whirl-spoc-training"
+    wandb_project: str = "spoc-training"
     wandb_entity: Optional[str] = None
 
     extra_tag: str = "rby1_rigid"
