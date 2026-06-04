@@ -43,7 +43,7 @@ class DroidPickPlaceEvalConfig(JsonBenchmarkEvalConfig):
             
 class DroidPickPlaceMultitaskEvalConfig(DroidPickPlaceEvalConfig):
     task_type: str = "pick_and_place"
-    hf_model_name: str | None = "allenai/MolmoBot-SPOC-DROID"
+    hf_model_name: str | None = "anonymous/MolmoBot-SPOC-DROID"
     policy_config: SPOCDroidPickPlacePolicyConfig = SPOCDroidPickPlacePolicyConfig()
 
 

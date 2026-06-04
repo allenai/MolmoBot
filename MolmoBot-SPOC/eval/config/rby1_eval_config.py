@@ -56,7 +56,7 @@ class RBY1EvalBaseConfig(JsonBenchmarkEvalConfig):
 
 class RBY1ArticulatedManipEvalConfig(RBY1EvalBaseConfig):
     task_type: str = "open"
-    hf_model_name: str | None = "allenai/MolmoBot-SPOC-RBY1Articulated"
+    hf_model_name: str | None = "anonymous/MolmoBot-SPOC-RBY1Articulated"
     policy_config: SPOCRBY1ArticulatedManipPolicyConfig = (
         SPOCRBY1ArticulatedManipPolicyConfig()
     )
@@ -64,5 +64,5 @@ class RBY1ArticulatedManipEvalConfig(RBY1EvalBaseConfig):
 
 class RBY1RigidManipEvalConfig(RBY1EvalBaseConfig):
     task_type: str = "pick"
-    hf_model_name: str | None = "allenai/MolmoBot-SPOC-RBY1Rigid"
+    hf_model_name: str | None = "anonymous/MolmoBot-SPOC-RBY1Rigid"
     policy_config: SPOCRBY1RigidManipPolicyConfig = SPOCRBY1RigidManipPolicyConfig()

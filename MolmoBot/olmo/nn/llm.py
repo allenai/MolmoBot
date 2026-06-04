@@ -98,7 +98,6 @@ class ActivationType(StrEnum):
 class InitFnType(StrEnum):
     mitchell = "mitchell"
     """
-    The strategy suggested to us by Mitchell Wortsman from UW.
     This uses a truncated normal distribution with an adaptive standard deviation that depends
     on the size of the weights as well as the depth of the layer.
     """

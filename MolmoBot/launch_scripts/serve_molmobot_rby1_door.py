@@ -5,7 +5,7 @@ Usage:
 
     # From HuggingFace (recommended):
     PYTHONPATH=. python launch_scripts/serve_molmobot_rby1_door.py \
-        --hf_repo allenai/MolmoBot-RBY1DoorOpening
+        --hf_repo anonymous/MolmoBot-RBY1DoorOpening
 
     # From local path:
     PYTHONPATH=. python launch_scripts/serve_molmobot_rby1_door.py \

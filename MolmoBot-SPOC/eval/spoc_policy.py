@@ -126,14 +126,14 @@ class SPOCModelPolicy(InferencePolicy):
         policy_cfg = self.config.policy_config
 
         run = api.run(
-            f"prior-ai2/{policy_cfg.wandb_source_project}/{policy_cfg.training_run_id}"
+            f"anonymous/{policy_cfg.wandb_source_project}/{policy_cfg.training_run_id}"
         )
         ckpt_dir = os.path.join(
             "ckpts", f"{policy_cfg.training_run_id}_{policy_cfg.ckpt_step}"
         )
         os.makedirs(ckpt_dir, exist_ok=True)
 
-        ckpt_fn = f"prior-ai2/{policy_cfg.wandb_source_project}/ckpt-{policy_cfg.training_run_id}-{policy_cfg.ckpt_step}:latest"
+        ckpt_fn = f"anonymous/{policy_cfg.wandb_source_project}/ckpt-{policy_cfg.training_run_id}-{policy_cfg.ckpt_step}:latest"
         ckpt_pth = os.path.join(ckpt_dir, "model_patched.ckpt")
         if not os.path.exists(ckpt_pth):
             ckpt_pth = os.path.join(ckpt_dir, "model.ckpt")

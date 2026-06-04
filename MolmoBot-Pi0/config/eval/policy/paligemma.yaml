@@ -6,7 +6,7 @@ type: pi
 action_type: jointpos
 
 model_name: null
-model_dir: hf://allenai/MolmoBot-Pi0-DROID
+model_dir: hf://anonymous/MolmoBot-Pi0-DROID
 checkpoints: null
 use_torch: true
 buffer_length: -1

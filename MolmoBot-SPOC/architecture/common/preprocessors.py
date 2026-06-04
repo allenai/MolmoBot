@@ -234,7 +234,7 @@ class Preprocessor:
 
         # # load Tiny-ImageNet or ImageNet dataset without resize
         # self.imagenet_data = datasets.ImageFolder(
-        #     "/data/input/ainaze/tiny-imagenet-200/train",   # or "/path/to/imagenet/train"
+        #     "/path/to/tiny-imagenet-200/train",   # or "/path/to/imagenet/train"
         #     transform=transforms.ToTensor()   # only convert to tensor
         # )
 

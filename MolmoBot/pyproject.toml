@@ -5,10 +5,9 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "molmobot"
 dynamic = ["version"]
-readme = "README.md"
 description = "Training code for MolmoBot"
 authors = [
-    { name = "Allen Institute for Artificial Intelligence" }
+    { name = "Anonymous" }
 ]
 requires-python = "~=3.11.0"
 license = { file = "LICENSE" }
@@ -87,10 +86,6 @@ eval = [
 all = [
     "molmobot[dev,train,eval]",
 ]
-
-[project.urls]
-Homepage = "https://github.com/allenai/molmobot"
-Repository = "https://github.com/allenai/molmobot"
 
 [tool.setuptools]
 include-package-data = true

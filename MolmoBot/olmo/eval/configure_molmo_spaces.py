@@ -433,7 +433,7 @@ class SynthVLARBY1EvalConfig(JsonBenchmarkEvalConfig):
     def model_post_init(self, __context) -> None:
         super().model_post_init(__context)
         self.robot_config.action_noise_config.enabled = False
-        # Derive command_mode from action_keys (same logic as Maya's DoorOpeningEvalConfig)
+        # Derive command_mode from action_keys (same logic as DoorOpeningEvalConfig)
         for mg, action_key in self.policy_config.action_keys.items():
             if action_key in ("joint_pos_rel", "delta_actions"):
                 if mg == "base":

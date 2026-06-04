@@ -373,7 +373,7 @@ def main(cfg: DictConfig):
     out_dir = Path(hydra.core.hydra_config.HydraConfig.get().runtime.output_dir)
     experiment_url = get_experiment_url()
     run = wandb.init(
-        entity="prior-ai2",
+        entity="anonymous",
         project="synth-vla",
         name=os.environ.get("GANTRY_TASK_NAME", None),
         dir=out_dir.as_posix(),

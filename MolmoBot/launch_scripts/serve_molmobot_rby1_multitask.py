@@ -7,11 +7,11 @@ Usage:
 
     # Door+open (from HuggingFace):
     PYTHONPATH=. python launch_scripts/serve_molmobot_rby1_multitask.py \
-        --task_type door_plus_open --hf_repo allenai/MolmoBot-RBY1Multitask
+        --task_type door_plus_open --hf_repo anonymous/MolmoBot-RBY1Multitask
 
     # Pick+pnp:
     PYTHONPATH=. python launch_scripts/serve_molmobot_rby1_multitask.py \
-        --task_type pick_pnp --hf_repo allenai/MolmoBot-RBY1Multitask
+        --task_type pick_pnp --hf_repo anonymous/MolmoBot-RBY1Multitask
 
     # From local path:
     PYTHONPATH=. python launch_scripts/serve_molmobot_rby1_multitask.py \

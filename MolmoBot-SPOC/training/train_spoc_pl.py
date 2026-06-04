@@ -963,7 +963,7 @@ def launch_training(config):
         if not os.path.exists(resume_ckpt_path):
             # Download checkpoint from wandb using the API directly
             os.makedirs(ckpt_dir, exist_ok=True)
-            wandb_entity = config.wandb_entity or "prior-ai2"
+            wandb_entity = config.wandb_entity or "anonymous"
             artifact_name = f"{wandb_entity}/{config.wandb_project}/ckpt-{config.run_id}-{config.step}:latest"
             logger.info(f"Downloading checkpoint artifact: {artifact_name}")
             try:
