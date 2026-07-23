@@ -57,6 +57,8 @@ class SynthManipMolmoInferenceWrapper:
         norm_repo_id: str = "synthmanip",
         use_bfloat16: bool = True,
         compile_model: bool = False,
+        compile_mode: str = "max-autotune",
+        compile_cudagraphs: bool = False,
         states_mode: Optional[str] = None,
     ):
         """
@@ -65,10 +67,14 @@ class SynthManipMolmoInferenceWrapper:
         Args:
             checkpoint_path: Path to the model checkpoint directory.
             device: Device to run inference on ("cuda" or "cpu").
-            num_flow_steps: Number of flow-matching integration steps. 
+            num_flow_steps: Number of flow-matching integration steps.
                            Uses checkpoint default if None.
             max_seq_len: Maximum sequence length. Uses checkpoint default if None.
             norm_repo_id: Repository ID for normalization stats lookup.
+            compile_cudagraphs: With compile_model, also capture CUDA graphs
+                (options={"triton.cudagraphs": True}) — lowest steady-state
+                latency. Requires all cached tensors to be pre-built on GPU,
+                which _load_checkpoint now guarantees.
         """
         self.checkpoint_path = checkpoint_path
         self.device = torch.device(device if torch.cuda.is_available() else "cpu")
@@ -76,6 +82,8 @@ class SynthManipMolmoInferenceWrapper:
         self.norm_repo_id = norm_repo_id
         self.use_bfloat16 = use_bfloat16
         self.compile_model = compile_model
+        self.compile_mode = compile_mode
+        self.compile_cudagraphs = compile_cudagraphs
 
         self.states_mode = states_mode
 
@@ -139,11 +147,45 @@ class SynthManipMolmoInferenceWrapper:
         else:
             self.model.to(self.device)
         self.model.eval()
+        # Move the BufferCache (image_tokens, casual_mask) to GPU so torch.compile
+        # can use cudagraphs instead of skipping them due to CPU-resident tensors.
+        # BufferCache is a plain dict, not registered buffers, so .to(device)
+        # on the model does NOT move it -- we must do it explicitly.
+        if hasattr(self.model, "_VideoOlmo__cache"):
+            cache = self.model._VideoOlmo__cache
+            cache.to(device=self.device)
+            log.info(f"Moved BufferCache to {self.device}")
+            # Pre-build the causal mask at full max_seq_len so the forward pass never
+            # lazily allocates it INSIDE the compiled graph: a tensor created during
+            # cudagraph capture and stored in the cache is backed by graph-pool memory
+            # that later replays overwrite ("accessing tensor output of CUDAGraphs that
+            # has been overwritten by a subsequent run"). Building it here keeps it a
+            # stable static input to the graph.
+            if self.device.type == "cuda":
+                cache["casual_mask"] = torch.tril(torch.ones(
+                    self.max_seq_len, self.max_seq_len,
+                    device=self.device, dtype=torch.bool))[None, :, :]
+                log.info(f"Pre-built causal mask ({self.max_seq_len}x{self.max_seq_len}) on {self.device}")
+        # Pre-fill the RoPE sin/cos tables (same lazily-cached-tensor problem as the causal
+        # mask: rope_pos_sin/cos are otherwise created inside the first compiled forward and
+        # stored in the BufferCache -- under cudagraphs that tensor is graph-pool memory that
+        # later replays overwrite). The trainer calls warmup_cache at startup; do the same here.
+        if hasattr(self.model, "warmup_cache") and self.device.type == "cuda":
+            self.model.warmup_cache(self.device)
+            log.info(f"Warmed up RoPE cache on {self.device}")
         log.info("Model loaded successfully")
 
         if self.compile_model:
-            log.info("Use model in compile mode. It will compile each frame setting for the multi-frame model.")
-            self.model.generate_actions = torch.compile(self.model.generate_actions, mode="max-autotune")
+            # "default"/"none"/"" -> torch.compile default mode (mode=None); else the named mode
+            # ("reduce-overhead", "max-autotune"). max-autotune autotunes kernels (slow first call).
+            _mode = None if self.compile_mode.lower() in ("", "default", "none") else self.compile_mode
+            # cudagraphs shaves CPU launch overhead on top of kernel fusion (~282->166ms vs
+            # ~282->181ms compile-only on step21800) and needs the cache warmups above.
+            _options = {"triton.cudagraphs": True} if self.compile_cudagraphs else None
+            log.info(f"Use model in compile mode={_mode!r} (cudagraphs={self.compile_cudagraphs}). "
+                     f"It will compile each frame setting for the multi-frame model.")
+            self.model.generate_actions = torch.compile(
+                self.model.generate_actions, mode=_mode, options=_options)
             log.info("Done initial compiling")
 
     def _build_processors(self) -> None:

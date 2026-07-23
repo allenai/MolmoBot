@@ -241,6 +241,12 @@ class BufferCache(dict, MutableMapping[str, torch.Tensor]):
     NaNs when they're synchronized due to casting or some other issue.
     """
 
+    def to(self, device=None, dtype=None) -> "BufferCache":
+        for k, v in self.items():
+            if isinstance(v, torch.Tensor):
+                self[k] = v.to(device=device, dtype=dtype)
+        return self
+
 
 def get_element_size(dtype: torch.dtype) -> int:
     """
