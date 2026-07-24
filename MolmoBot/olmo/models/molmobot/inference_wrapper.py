@@ -60,6 +60,7 @@ class SynthManipMolmoInferenceWrapper:
         compile_mode: str = "max-autotune",
         compile_cudagraphs: bool = False,
         compile_dynamic: Optional[bool] = None,
+        compile_pad_len: Optional[int] = None,
         states_mode: Optional[str] = None,
     ):
         """
@@ -94,6 +95,16 @@ class SynthManipMolmoInferenceWrapper:
         # (~125-134ms generate_actions), with only occasional short recompiles as the dynamic range
         # widens. Steady-state numerics are unchanged (mark_dynamic only affects specialization).
         self.compile_dynamic = bool(compile_dynamic) if compile_dynamic is not None else False
+        # compile_pad_len: the ROBUST length-robustness fix. Pad every request to this FIXED seq_len
+        # (via the collator's "to_max" path + a bucket-sized preprocessor), so seq_len is constant
+        # and torch.compile+cudagraphs capture EXACTLY ONCE -- zero recompiles ever, no mid-episode
+        # stalls. Preferred over compile_dynamic for eval sweeps / control loops, where a ~20-30s
+        # range-widening recompile mid-episode is unacceptable. Must be >= the largest real seq_len
+        # (~1600 fixed image tokens + instruction); the collator raises if an image token would be
+        # truncated. Padded positions are masked out (attention_mask -> LLM bias + cross-attn mask),
+        # so outputs are numerically identical to the unpadded call. Takes precedence over
+        # compile_dynamic when set.
+        self.compile_pad_len = int(compile_pad_len) if compile_pad_len else None
 
         self.states_mode = states_mode
 
@@ -206,17 +217,25 @@ class SynthManipMolmoInferenceWrapper:
 
     def _build_processors(self) -> None:
         """Build preprocessor and collator from model config."""
+        # When a fixed pad length is set, size the preprocessor to that bucket and turn on the
+        # collator's "to_max" padding so every request is padded to a CONSTANT seq_len -> the
+        # compiled+cudagraphed graph is captured exactly once (no per-instruction-length recompile).
+        pad_to = self.compile_pad_len or None
+        prep_max_seq_len = pad_to if pad_to else self.max_seq_len
         self.preprocessor = self.model_config.build_preprocessor(
             for_inference=True,
             is_training=False,
-            max_seq_len=self.max_seq_len,
+            max_seq_len=prep_max_seq_len,
         )
 
         self.collator = self.model_config.build_collator(
             self.preprocessor.get_output_shapes(),
-            pad_mode=None,
+            pad_mode=("to_max" if pad_to else None),
             include_metadata=True,
         )
+        if pad_to:
+            log.info(f"Padding every request to fixed seq_len={pad_to} (constant-shape compile; "
+                     f"one capture, zero recompiles).")
 
     def _build_normalizers(self) -> None:
         """Build state normalizer and action unnormalizer from config."""
@@ -379,11 +398,13 @@ class SynthManipMolmoInferenceWrapper:
         }
         model_inputs = {k: v for k, v in model_inputs.items() if v is not None}
 
-        # When compiling, mark ONLY the LLM sequence dim (dim 1) dynamic so a single compiled +
-        # cudagraphed graph serves every instruction length instead of recompiling ~365s per length
-        # (seq_len varies with the instruction; image/action dims and batch stay concrete). Applied
-        # every call for consistent guards; it only affects compilation, not the computed values.
-        if self.compile_model and self.compile_dynamic:
+        # Length-robustness for the compiled graph. compile_pad_len already pads every request to a
+        # constant seq_len (one capture, zero recompiles), so nothing to do there. Otherwise, if
+        # compile_dynamic is set, mark ONLY the LLM sequence dim (dim 1) dynamic so one graph serves
+        # multiple lengths -- but note this can still trigger occasional short recompiles as the
+        # dynamic range widens, so compile_pad_len is preferred for eval/control. mark_dynamic only
+        # affects compilation, not the computed values.
+        if self.compile_model and self.compile_dynamic and not self.compile_pad_len:
             for _k in ("input_ids", "position_ids", "response_mask", "attention_mask"):
                 _t = model_inputs.get(_k)
                 if torch.is_tensor(_t) and _t.dim() >= 2:
