@@ -39,6 +39,71 @@ from PIL import Image
 
 log = logging.getLogger(__name__)
 
+_E4M3_MAX = 448.0  # max magnitude of float8_e4m3fn
+
+
+class _Fp8DynamicLinear(torch.nn.Module):
+    """Per-tensor dynamic fp8 (e4m3) drop-in for ``nn.Linear`` (Blackwell inference).
+
+    The raw fp8 tensor-core GEMM (``torch._scaled_mm``) is ~2x bf16 on sm_90/sm_100/sm_120, but
+    rowwise fp8 scaling is unsupported on sm_120 (per-tensor only) and torchao's tensor-subclass
+    path does NOT fuse the activation quant there (measured ~1.04x end-to-end). This hand-rolled
+    ``amax -> cast -> _scaled_mm`` is plain torch, so ``torch.compile`` fuses the activation quant
+    into one kernel -> ~1.5-1.9x on the LLM GEMMs, ~1.16x end-to-end (144->124ms generate_actions),
+    at 0.4% max action-chunk delta. Weight is quantized ONCE here; activation per call (the amax is
+    a few us vs a ~250us GEMM, so static calibration is unnecessary). Use only under torch.compile.
+    """
+
+    def __init__(self, weight: torch.Tensor, bias: Optional[torch.Tensor] = None,
+                 use_fast_accum: bool = True):
+        super().__init__()
+        w = weight.detach()
+        self.out_features, self.in_features = w.shape
+        self.use_fast_accum = use_fast_accum
+        wscale = (w.float().abs().amax() / _E4M3_MAX).clamp(min=1e-12)
+        w_fp8 = (w.float() / wscale).clamp(-_E4M3_MAX, _E4M3_MAX).to(torch.float8_e4m3fn)
+        self.register_buffer("weight_fp8", w_fp8.contiguous())          # (N, K) row-major
+        self.register_buffer("weight_scale", wscale.float().reshape(1))
+        if bias is not None:
+            self.register_buffer("bias", bias.detach().to(torch.bfloat16))
+        else:
+            self.bias = None
+
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
+        in_shape = x.shape
+        x2d = x.reshape(-1, self.in_features)
+        ascale = (x2d.float().abs().amax() / _E4M3_MAX).clamp(min=1e-12)
+        xq = (x2d.float() / ascale).clamp(-_E4M3_MAX, _E4M3_MAX).to(torch.float8_e4m3fn)
+        out = torch._scaled_mm(
+            xq, self.weight_fp8.t(),                                     # RHS -> (K, N) column-major
+            scale_a=ascale.reshape(1), scale_b=self.weight_scale,
+            out_dtype=torch.bfloat16, use_fast_accum=self.use_fast_accum,
+        )
+        if self.bias is not None:
+            out = out + self.bias
+        return out.reshape(*in_shape[:-1], self.out_features)
+
+
+def _convert_linear_to_fp8(model, should_convert) -> int:
+    """Replace ``nn.Linear`` where ``should_convert(fqn, module)`` is True with _Fp8DynamicLinear.
+
+    Returns the number converted. See examples/inference/fp8_linear.py for the standalone/tested copy.
+    """
+    n = 0
+
+    def recurse(mod, prefix):
+        nonlocal n
+        for attr, child in list(mod.named_children()):
+            fqn = f"{prefix}.{attr}" if prefix else attr
+            if isinstance(child, torch.nn.Linear) and should_convert(fqn, child):
+                setattr(mod, attr, _Fp8DynamicLinear(child.weight, child.bias).to(child.weight.device))
+                n += 1
+            else:
+                recurse(child, fqn)
+
+    recurse(model, "")
+    return n
+
 
 class SynthManipMolmoInferenceWrapper:
     """
@@ -61,6 +126,7 @@ class SynthManipMolmoInferenceWrapper:
         compile_cudagraphs: bool = False,
         compile_dynamic: Optional[bool] = None,
         compile_pad_len: Optional[int] = None,
+        quantize: Optional[str] = None,
         states_mode: Optional[str] = None,
     ):
         """
@@ -105,6 +171,11 @@ class SynthManipMolmoInferenceWrapper:
         # so outputs are numerically identical to the unpadded call. Takes precedence over
         # compile_dynamic when set.
         self.compile_pad_len = int(compile_pad_len) if compile_pad_len else None
+        # quantize="fp8": cast the dense LLM-block Linears (att_proj/attn_out/ff_proj/ff_out) to
+        # per-tensor dynamic fp8 (e4m3) BEFORE torch.compile, so inductor fuses the activation quant
+        # -> ~1.16x end-to-end (144->124ms generate_actions) at 0.4% max action delta. Only helps
+        # WITH compile_model (eager fp8 is slower). ViT / action-expert / embeddings stay bf16.
+        self.quantize = (quantize or "").lower() or None
 
         self.states_mode = states_mode
 
@@ -195,6 +266,16 @@ class SynthManipMolmoInferenceWrapper:
             self.model.warmup_cache(self.device)
             log.info(f"Warmed up RoPE cache on {self.device}")
         log.info("Model loaded successfully")
+
+        # fp8 quantization of the dense LLM blocks -- MUST run before torch.compile so inductor
+        # fuses the per-call activation quant into the fp8 GEMM (that fusion is the whole win).
+        if self.quantize == "fp8":
+            n = _convert_linear_to_fp8(
+                self.model, lambda fqn, m: fqn.startswith("transformer.blocks"))
+            log.info(f"Quantized {n} LLM-block Linears to per-tensor dynamic fp8 (e4m3).")
+            if not self.compile_model:
+                log.warning("quantize='fp8' WITHOUT compile_model: eager fp8 is SLOWER than bf16; "
+                            "enable compile_model to get the speedup.")
 
         if self.compile_model:
             # "default"/"none"/"" -> torch.compile default mode (mode=None); else the named mode
