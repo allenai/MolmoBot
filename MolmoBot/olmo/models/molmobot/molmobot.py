@@ -324,17 +324,23 @@ class MolmoBot(VideoOlmo):
             generator=generator,
         )
 
+        # The action expert's cross-attention context (per-layer K/V from the LLM hidden states,
+        # the robot state, and the attention mask) is identical across all flow steps, so project
+        # it ONCE here instead of re-projecting the full ~1600-token context every step. Each step
+        # then only projects the ~16 action-token queries. `cache` is a per-call local (never stored
+        # on self / BufferCache), so it stays a graph-internal intermediate and is cudagraph-safe.
+        cache = self.action_expert.prepare_cross_context(
+            layer_states,
+            encoder_attention_mask,
+            states,
+            self.config.states_mode,
+            batch_size,
+        )
+
         dt = 1.0 / steps
         for i in range(steps):
             t = torch.full((batch_size,), i / steps, device=device)
-            velocity = self.action_expert(
-                trajectory,
-                t,
-                layer_states,
-                encoder_attention_mask=encoder_attention_mask,
-                state_embeddings=states,
-                states_mode=self.config.states_mode,
-            )
+            velocity = self.action_expert.denoise_step(trajectory, t, cache)
             trajectory = trajectory + dt * velocity
         return trajectory
 
