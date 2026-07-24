@@ -777,13 +777,25 @@ class VideoOlmo(ModelBase):
                 else:
                     image_features = vision_backbone_output
                 is_high_res_patch = input_ids.view(-1) == self._image_high_res_id
+                # Inject image features OUT-OF-PLACE. The boolean-mask scatter-add
+                # (`x_flat[mask] += feats`) graph-breaks under torch.compile, which turns `x`
+                # into an input of the resumed subgraph; mutating a graph input makes inductor
+                # skip cudagraphs ("skipping cudagraphs due to mutated inputs"). masked_scatter
+                # into zeros + add is equivalent (True rows consume image_features rows in
+                # order) and keeps every op functional.
                 if any(is_high_res_patch):
-                    x.view(-1, x.shape[-1])[is_high_res_patch] += image_features
+                    x_flat = x.view(-1, x.shape[-1])
+                    adds = torch.zeros_like(x_flat).masked_scatter(
+                        is_high_res_patch.unsqueeze(-1), image_features.to(x_flat.dtype))
+                    x = (x_flat + adds).view_as(x)
                     if deepstack_image_features is not None:
                         image_pos_masks = [is_high_res_patch]
                 else:
                     is_image_patch = input_ids.view(-1) == self._image_patch_id
-                    x.view(-1, x.shape[-1])[is_image_patch] += image_features
+                    x_flat = x.view(-1, x.shape[-1])
+                    adds = torch.zeros_like(x_flat).masked_scatter(
+                        is_image_patch.unsqueeze(-1), image_features.to(x_flat.dtype))
+                    x = (x_flat + adds).view_as(x)
                     if deepstack_image_features is not None:
                         image_pos_masks = [is_image_patch]
             else:

@@ -1,6 +1,6 @@
 import math
 from dataclasses import dataclass, field
-from typing import Optional, Sequence
+from typing import Optional, Sequence, Tuple
 
 import torch
 import torch.nn.functional as F
@@ -40,30 +40,48 @@ class ActionExpertAttention(nn.Module):
         self.proj = nn.Linear(hidden_size, hidden_size)
         self.proj_drop = nn.Dropout(proj_dropout)
 
+    def precompute_kv(self, kv: torch.Tensor) -> Tuple[torch.Tensor, torch.Tensor]:
+        """Project a step-invariant K/V source into (k, v), each (B, num_heads, M, head_dim).
+
+        Factored out so the flow-matching inference loop can compute the cross-attention
+        K/V once (the LLM context is identical across all denoising steps) instead of
+        re-projecting the full context every step. Reproduces exactly the kv_proj/view/permute
+        the non-cached path in ``forward`` runs, so the cached path is bitwise-identical.
+        """
+        bsz, src_len, _ = kv.shape
+        kv = self.kv_proj(kv)
+        kv = kv.view(bsz, src_len, 2, self.num_heads, self.head_dim).permute(2, 0, 3, 1, 4)
+        return kv[0], kv[1]
+
     def forward(
         self,
         x: torch.Tensor,
         kv: Optional[torch.Tensor] = None,
         attn_mask: Optional[torch.Tensor] = None,
+        kv_cache: Optional[Tuple[torch.Tensor, torch.Tensor]] = None,
     ) -> torch.Tensor:
         """
         Args:
             x: (B, N, C) input queries.
             kv: (B, M, C) key/value source. Defaults to self-attention.
             attn_mask: optional mask broadcastable to (B, num_heads, N, M).
+            kv_cache: optional precomputed (k, v) from ``precompute_kv``. When given, ``kv``
+                is ignored and ``kv_proj`` is skipped -- used by the inference flow loop to
+                reuse step-invariant cross-attention K/V. Defaults to None (unchanged behavior).
         """
-        if kv is None:
-            kv = x
-
         bsz, tgt_len, _ = x.shape
-        src_len = kv.shape[1]
-
         q = self.q_proj(x)
-        kv = self.kv_proj(kv)
-
         q = q.view(bsz, tgt_len, self.num_heads, self.head_dim).permute(0, 2, 1, 3)
-        kv = kv.view(bsz, src_len, 2, self.num_heads, self.head_dim).permute(2, 0, 3, 1, 4)
-        k, v = kv[0], kv[1]
+
+        if kv_cache is not None:
+            k, v = kv_cache
+        else:
+            if kv is None:
+                kv = x
+            src_len = kv.shape[1]
+            kv = self.kv_proj(kv)
+            kv = kv.view(bsz, src_len, 2, self.num_heads, self.head_dim).permute(2, 0, 3, 1, 4)
+            k, v = kv[0], kv[1]
 
         q = q * self.scale
         attn_scores = torch.matmul(q, k.transpose(-2, -1))
@@ -126,8 +144,9 @@ class ActionExpertBlock(nn.Module):
         self,
         x: torch.Tensor,
         timestep_embed: torch.Tensor,
-        cross_context: torch.Tensor,
+        cross_context: Optional[torch.Tensor] = None,
         attn_mask: Optional[torch.Tensor] = None,
+        cross_kv_cache: Optional[Tuple[torch.Tensor, torch.Tensor]] = None,
     ) -> torch.Tensor:
         (
             shift_msa,
@@ -146,6 +165,7 @@ class ActionExpertBlock(nn.Module):
             _modulate(self.norm2(x), shift_mca, scale_mca),
             kv=cross_context,
             attn_mask=attn_mask,
+            kv_cache=cross_kv_cache,
         )
         x = x + gate_mlp.unsqueeze(1) * self.mlp(_modulate(self.norm3(x), shift_mlp, scale_mlp))
         return x
@@ -509,5 +529,109 @@ class ActionExpert(nn.Module):
         if states_mode == "self_attn":
             state_seq_len = encoded_states.shape[1]
             output = output[:, state_seq_len:, :]
+
+        return output
+
+    # ------------------------------------------------------------------
+    # Inference-only fast path: cache the step-invariant cross-attention
+    # context once, then run a light per-step forward across flow steps.
+    # `forward` above is left untouched so the training path is unchanged.
+    # ------------------------------------------------------------------
+    def prepare_cross_context(
+        self,
+        encoder_hidden_states: Sequence[torch.Tensor],
+        encoder_attention_mask: Optional[torch.Tensor],
+        state_embeddings: Optional[torch.Tensor],
+        states_mode: str,
+        batch_size: int,
+    ) -> dict:
+        """Precompute the step-invariant cross-attention inputs once for flow-matching inference.
+
+        During flow-matching the LLM context (``encoder_hidden_states``), the robot state, and the
+        attention mask are identical across all denoising steps, so their projection into per-layer
+        cross-attention K/V (plus the cross mask and encoded state) can be computed once and reused
+        rather than re-projecting the full ~1600-token context on every step. Returns a dict
+        consumed by :meth:`denoise_step`. Used only at inference (:meth:`MolmoBot.generate_actions`);
+        training keeps calling :meth:`forward`.
+        """
+        if len(encoder_hidden_states) != len(self.blocks):
+            raise ValueError(
+                f"Expected {len(self.blocks)} encoder hidden states, got {len(encoder_hidden_states)}"
+            )
+
+        encoded_states = self._encode_states(state_embeddings)
+
+        if states_mode == "self_attn":
+            assert encoded_states is not None, "State embeddings must be provided when states_mode is 'self_attn'"
+            # states are prepended to the action sequence per step (in denoise_step), not in context
+            contexts = self._prepare_context(encoder_hidden_states, None)
+            mask_states = None
+        else:
+            contexts = self._prepare_context(encoder_hidden_states, encoded_states)
+            mask_states = encoded_states
+
+        # Match forward's mask dtype: it builds the mask with x.dtype, and here contexts[0].dtype
+        # equals x.dtype (both action_embed and context_proj outputs carry the autocast/param dtype),
+        # so `attn_scores + attn_mask` and the finfo(dtype).min fill are identical to forward.
+        cross_mask = self._build_cross_attention_mask(
+            encoder_attention_mask,
+            mask_states,
+            batch_size,
+            contexts[0].dtype,
+        )
+
+        kv_cache = [block.attn2.precompute_kv(ctx) for block, ctx in zip(self.blocks, contexts)]
+        return {
+            "kv": kv_cache,
+            "mask": cross_mask,
+            "encoded_states": encoded_states,
+            "states_mode": states_mode,
+        }
+
+    def denoise_step(
+        self,
+        actions: torch.Tensor,
+        timesteps: torch.Tensor,
+        cache: dict,
+    ) -> torch.Tensor:
+        """One flow-matching step reusing the cached cross-attention context.
+
+        Equivalent to ``forward(actions, timesteps, encoder_hidden_states, ...)`` but with the
+        step-invariant context preparation replaced by ``cache`` from :meth:`prepare_cross_context`.
+        Runs the same ops in the same order, so it is bitwise-identical to :meth:`forward` for
+        matching inputs; only the redundant per-step context/K-V projection is removed.
+        """
+        bsz, seq_len, _ = actions.shape
+        if seq_len > self.config.max_horizon:
+            raise ValueError(
+                f"Action sequence length {seq_len} exceeds configured max_horizon={self.config.max_horizon}"
+            )
+
+        timestep_embed = self.time_embed(timesteps)
+        x = self.action_embed(actions)
+
+        states_mode = cache["states_mode"]
+        if states_mode == "self_attn":
+            encoded_states = cache["encoded_states"]
+            x = torch.cat([encoded_states, x], dim=1)
+            state_seq_len = encoded_states.shape[1]
+            total_seq_len = state_seq_len + seq_len
+            if total_seq_len > self.config.max_horizon:
+                raise ValueError(
+                    f"Total sequence length {total_seq_len} (states: {state_seq_len} + actions: {seq_len}) "
+                    f"exceeds configured max_horizon={self.config.max_horizon} in self_attn mode"
+                )
+            x = x + self.action_pos_embed[:, :total_seq_len, :]
+        else:
+            x = x + self.action_pos_embed[:, :seq_len, :]
+
+        cross_mask = cache["mask"]
+        for block, kv in zip(self.blocks, cache["kv"]):
+            x = block(x, timestep_embed, cross_context=None, attn_mask=cross_mask, cross_kv_cache=kv)
+
+        output = self.final_layer(x, timestep_embed)
+
+        if states_mode == "self_attn":
+            output = output[:, cache["encoded_states"].shape[1]:, :]
 
         return output
