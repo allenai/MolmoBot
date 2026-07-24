@@ -381,6 +381,18 @@ class SynthManipMolmoInferenceWrapper:
 
         # Preprocess and collate
         processed = self.preprocessor(example)
+        # With compile_pad_len, the collator pads/truncates every request to that FIXED seq_len so
+        # the compiled graph never recompiles. Trade-off when a request is LONGER than the bucket:
+        # the collator truncates the tail (input_tokens[:pad_len]) -- it RAISES if that would cut an
+        # image token, but a long INSTRUCTION tail is dropped SILENTLY (no error, no recompile, just
+        # a shortened prompt). Normal task instructions are tiny next to the ~1600 image tokens, so
+        # this never fires in practice; warn if it ever does so a clipped prompt is visible.
+        if self.compile_pad_len is not None:
+            _tok = processed.get("input_tokens")
+            if _tok is not None and len(_tok) > self.compile_pad_len:
+                log.warning(f"Request seq_len={len(_tok)} exceeds compile_pad_len="
+                            f"{self.compile_pad_len}; instruction tail will be truncated. "
+                            f"Raise COMPILE_PAD_LEN to avoid clipping.")
         batch = self.collator([processed])
         batch = move_to_device(batch, self.device)
 
