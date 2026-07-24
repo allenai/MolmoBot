@@ -59,6 +59,7 @@ class SynthManipMolmoInferenceWrapper:
         compile_model: bool = False,
         compile_mode: str = "max-autotune",
         compile_cudagraphs: bool = False,
+        compile_dynamic: Optional[bool] = None,
         states_mode: Optional[str] = None,
     ):
         """
@@ -84,6 +85,15 @@ class SynthManipMolmoInferenceWrapper:
         self.compile_model = compile_model
         self.compile_mode = compile_mode
         self.compile_cudagraphs = compile_cudagraphs
+        # compile_dynamic: with compile_model, mark ONLY the LLM sequence dim dynamic (via
+        # torch._dynamo.mark_dynamic in get_action_chunk) so ONE compiled+cudagraphed graph serves
+        # every instruction length. Without it, seq_len varies per instruction (~1621-1634: ~1600
+        # fixed image tokens + a few instruction tokens) and the whole-graph capture recompiles
+        # ~365s per distinct length -- making compile a net loss for varied-instruction eval sweeps.
+        # Measured (step21800): after one compile, all lengths run at steady cudagraph speed
+        # (~125-134ms generate_actions), with only occasional short recompiles as the dynamic range
+        # widens. Steady-state numerics are unchanged (mark_dynamic only affects specialization).
+        self.compile_dynamic = bool(compile_dynamic) if compile_dynamic is not None else False
 
         self.states_mode = states_mode
 
@@ -182,8 +192,14 @@ class SynthManipMolmoInferenceWrapper:
             # cudagraphs shaves CPU launch overhead on top of kernel fusion (~282->166ms vs
             # ~282->181ms compile-only on step21800) and needs the cache warmups above.
             _options = {"triton.cudagraphs": True} if self.compile_cudagraphs else None
-            log.info(f"Use model in compile mode={_mode!r} (cudagraphs={self.compile_cudagraphs}). "
-                     f"It will compile each frame setting for the multi-frame model.")
+            log.info(f"Use model in compile mode={_mode!r} (cudagraphs={self.compile_cudagraphs}, "
+                     f"dynamic_seq={bool(self.compile_dynamic)}).")
+            # NOTE: do NOT pass a global dynamic=True here. The model builds the action trajectory
+            # with torch.randn((B, action_horizon, action_dim), generator=...); global dynamic makes
+            # action_horizon/action_dim symbolic and randn(symint, generator=) fails to trace. When
+            # compile_dynamic is set we instead mark ONLY the LLM sequence dim dynamic per-call in
+            # get_action_chunk (torch._dynamo.mark_dynamic), so one compiled graph serves every
+            # instruction length (no ~365s per-length recompile) while action dims stay concrete.
             self.model.generate_actions = torch.compile(
                 self.model.generate_actions, mode=_mode, options=_options)
             log.info("Done initial compiling")
@@ -362,6 +378,16 @@ class SynthManipMolmoInferenceWrapper:
             "states": batch.get("states"),
         }
         model_inputs = {k: v for k, v in model_inputs.items() if v is not None}
+
+        # When compiling, mark ONLY the LLM sequence dim (dim 1) dynamic so a single compiled +
+        # cudagraphed graph serves every instruction length instead of recompiling ~365s per length
+        # (seq_len varies with the instruction; image/action dims and batch stay concrete). Applied
+        # every call for consistent guards; it only affects compilation, not the computed values.
+        if self.compile_model and self.compile_dynamic:
+            for _k in ("input_ids", "position_ids", "response_mask", "attention_mask"):
+                _t = model_inputs.get(_k)
+                if torch.is_tensor(_t) and _t.dim() >= 2:
+                    torch._dynamo.mark_dynamic(_t, 1)
 
         # Generate actions
         with torch.no_grad():
