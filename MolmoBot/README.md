@@ -257,6 +257,28 @@ python launch_scripts/run_eval.py \
   --eval_config_cls olmo.eval.configure_molmo_spaces:MolmoBotRBY1DoorEvalConfig
 ```
 
-Other released RBY1 eval configs are:
-- `olmo.eval.configure_molmo_spaces:MolmoBotRBY1DoorPlusOpenEvalConfig`
-- `olmo.eval.configure_molmo_spaces:MolmoBotRBY1PickPnPEvalConfig`
+`<benchmark_dir>` must point at one of the RBY1 benchmarks in the **`molmospaces-bench-v2` release
+version `20260327`**. Note that the RBY1 benchmarks live under different scene datasets, so the
+paths are not all under the same prefix:
+
+| Task | Benchmark directory (relative to `molmospaces-bench-v2/20260327/`) | Eval config |
+| --- | --- | --- |
+| Door opening | `procthor-10k/rby1_benchmarks/door_opening_benchmark` | `olmo.eval.configure_molmo_spaces:MolmoBotRBY1DoorEvalConfig` |
+| Opening (other articulated objects) | `ithor/rby1_benchmarks/opening_benchmark` | `olmo.eval.configure_molmo_spaces:MolmoBotRBY1DoorPlusOpenEvalConfig` |
+| Pick | `procthor-objaverse/rby1_benchmarks/pick_benchmark` | `olmo.eval.configure_molmo_spaces:MolmoBotRBY1PickPnPEvalConfig` |
+| Pick and place | `procthor-objaverse/rby1_benchmarks/pnp_benchmark` | `olmo.eval.configure_molmo_spaces:MolmoBotRBY1PickPnPEvalConfig` |
+
+The benchmarks are downloaded automatically into `$MLSPACES_CACHE_DIR` (default
+`~/.cache/molmo-spaces-resources/benchmarks/`) from the
+[`allenai/molmospaces`](https://huggingface.co/datasets/allenai/molmospaces) HuggingFace dataset.
+
+Two version caveats:
+
+- Do not use `molmo_spaces` `main`. It requests benchmark version `20260415`, which is not published
+  on the public HuggingFace dataset, and its eval code is not guaranteed to match the released RBY1
+  checkpoints. Use the commit pinned in `pyproject.toml`.
+- The pinned commit itself requests benchmark version `20260325_1`, which **does not contain any
+  `rby1_benchmarks/` directories at all** — they were only added in `20260327`. If you check out the
+  pinned commit directly, also apply the one-line version fix from molmospaces commit `e1a2fe16`
+  (`molmo_spaces/molmo_spaces_constants.py`: `"molmospaces-bench-v2": "20260327"`), or the RBY1
+  benchmarks will be missing.
