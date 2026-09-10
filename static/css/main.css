@@ -28,9 +28,8 @@ body {
 /* ── HEADER ── */
 header {
   background: var(--bg);
-  padding: 48px 24px 32px;
+  padding: 48px 24px 0;
   text-align: center;
-  border-bottom: 1px solid var(--border);
 }
 
 .title-row {
@@ -58,16 +57,26 @@ h1 {
 h1 .highlight { color: var(--pink); }
 h1 .zero-o { font-family: "Share Tech Mono", monospace; display: inline-block; transform: scaleX(1.35); }
 
-.venue-badge {
-  display: inline-block;
-  margin-top: 12px;
-  background: var(--pink);
-  color: white;
-  font-size: 0.78rem;
+.venue {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin: 22px auto 0;
+  max-width: 420px;
+  width: 100%;
+  font-size: 0.85rem;
   font-weight: 700;
-  letter-spacing: 0.05em;
-  padding: 4px 14px;
-  border-radius: 999px;
+  letter-spacing: 0.06em;
+  color: var(--pink);
+  white-space: nowrap;
+}
+
+.venue::before,
+.venue::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: var(--border);
 }
 
 /* ── AUTHORS ── */
@@ -79,7 +88,7 @@ h1 .zero-o { font-family: "Share Tech Mono", monospace; display: inline-block; t
 }
 
 .authors-block {
-  margin-top: 16px;
+  margin-top: calc(16px - 0.68rem);
   font-size: 0.88rem;
   color: var(--text-secondary);
   line-height: 1.9;
