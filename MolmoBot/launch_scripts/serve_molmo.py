@@ -11,6 +11,7 @@ import torch
 from huggingface_hub import snapshot_download
 
 from molmo_spaces.policy.base_policy import InferencePolicy
+from olmo.device_util import default_device_type, device_count
 from olmo.eval.configure_real_robot import RealRobotVLAPolicy, RealRobotVLAPolicyConfig
 from olmo.eval.websocket_server import WebsocketPolicyServer
 
@@ -148,7 +149,7 @@ def main():
 
     action_type = args.action_type
     policy = load_molmo(checkpoint_path, action_type, args.no_max_delta)
-    print(f"Serving {checkpoint_path} policy on {torch.cuda.device_count()} GPUs")
+    print(f"Serving {checkpoint_path} policy on {device_count()} {default_device_type()} devices")
 
     server = WebsocketPolicyServer([policy], "synthvla", port=8000,
                                    metadata={"local_path": checkpoint_path, "s3-path": args.s3_path, "hf_repo": args.hf_repo})

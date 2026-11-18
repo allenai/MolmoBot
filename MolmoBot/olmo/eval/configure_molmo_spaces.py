@@ -10,6 +10,8 @@ from molmo_spaces.configs.policy_configs import BasePolicyConfig
 from molmo_spaces.policy.base_policy import InferencePolicy, StatefulPolicy
 from molmo_spaces.evaluation.configs.evaluation_configs import JsonBenchmarkEvalConfig
 
+from olmo.device_util import default_device_type
+
 logger = logging.getLogger(__name__)
 
 
@@ -229,7 +231,7 @@ class SynthVLAPolicyConfig(BasePolicyConfig):
     policy_type: str = "learned"
     action_type: str = "joint_pos_rel"
     policy_cls: type = None  # Set in model_post_init to avoid circular imports
-    device: str | None = "cuda" if torch.cuda.is_available() else "cpu"
+    device: str | None = default_device_type()
 
     # Set to your checkpoint path (local dir or use --hf_repo with serve scripts)
     checkpoint_path: str = ""
@@ -376,7 +378,7 @@ class SynthVLARBY1PolicyConfig(BasePolicyConfig):
     policy_type: str = "learned"
     action_type: str = "joint_pos_rel"
     policy_cls: type = None
-    device: str | None = "cuda" if torch.cuda.is_available() else "cpu"
+    device: str | None = default_device_type()
 
     checkpoint_path: str = ""  # Set to trained checkpoint
     camera_names: list[str] = ["wrist_camera_r", "head_camera", "wrist_camera_l"]
