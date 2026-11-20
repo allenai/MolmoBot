@@ -7,6 +7,8 @@ from pathlib import Path
 import imageio.v2 as imageio
 import numpy as np
 
+from point_prompt import draw_points
+
 
 class VideoWriter:
     def __init__(self, path: Path, fps: float):
@@ -33,8 +35,14 @@ class VideoWriter:
         self._thread.join()
 
 
-def agent_view(policy_obs: dict, camera_names: list[str]) -> np.ndarray:
-    """The exact images sent to the policy this step, side by side."""
-    frames = [policy_obs[name] for name in camera_names]
+def agent_view(
+    policy_obs: dict, camera_names: list[str], points: dict | None = None, point_camera: str | None = None
+) -> np.ndarray:
+    """The exact images sent to the policy this step, side by side, with any conditioning points drawn
+    on the point camera's panel (on a copy; the policy's images are untouched)."""
+    frames = [
+        draw_points(policy_obs[name], points, labels=False) if points and name == point_camera else policy_obs[name]
+        for name in camera_names
+    ]
     height = min(f.shape[0] for f in frames)
     return np.concatenate([f[:height] for f in frames], axis=1)

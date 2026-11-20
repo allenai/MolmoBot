@@ -26,6 +26,7 @@ robot:
     serial: DAANTG8W            # python -m rcs_robotiq2f85 serials
     speed: 85                   # mm/s, 20-150
     force: 100                  # N, 20-235. 20 is the gripper's minimum: it stops at first contact and barely squeezes
+    fixed_command: null         # null: use the policy's gripper action; open/closed: fixed (arm-only policies)
 
   cameras:                      # names must match the policy's camera_names
     wrist_camera: 14943057      # ZED Mini serial (python -m rcs_zed serials)
@@ -43,6 +44,12 @@ policy:
   port: 8000
   name: null                    # optional label; defaults to the HF repo / S3 / checkpoint dir name
   checkpoint_path: null         # override if the server's local_path isn't relative to MolmoBot/MolmoBot
+
+point_conditioning:             # for policies trained with use_point_prompts=True
+  enabled: true                # true: after homing, click points on `camera` in a GUI before starting
+  camera: exo_camera_1          # must match the training point_prompt_camera's role
+  labels: [goal]                # one click per label; must match training (push policies: goal)
+  append_to_prompt: false        # false: GUI + video dot only, task sent unchanged (for testing other policies)
 
 episode:
   max_duration_s: 60            # episode ends at this limit, or earlier on Ctrl+C

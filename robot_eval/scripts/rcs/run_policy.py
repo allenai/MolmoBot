@@ -16,12 +16,14 @@ from dataclasses import dataclass, field
 from pathlib import Path
 
 import hydra
+import imageio.v2 as imageio
 import numpy as np
 import rcs
 import wandb
 from hydra.core.hydra_config import HydraConfig
 from omegaconf import DictConfig, OmegaConf
 
+from point_prompt import Points, draw_points, format_point_prompt, select_points
 from policy_client import PolicyClient, policy_identity
 from rcs_env import CameraFailure, camera_frames, close_env, make_env, to_policy_obs, to_rcs_action
 from recording import VideoWriter, agent_view
@@ -34,6 +36,8 @@ logger = logging.getLogger("run_policy")
 class Episode:
     task: str
     out_dir: Path
+    prompt: str = ""  # text actually sent to the policy (task, plus point tags for point-conditioned policies)
+    points: Points = field(default_factory=dict)  # clicked points on the point camera, normalized 0-1
     end_reason: str = "unknown"
     duration_s: float = 0.0
     trajectory: dict[str, list] = field(default_factory=dict)
@@ -89,14 +93,16 @@ def run_episode(env, client: PolicyClient, obs: dict, cfg: DictConfig, episode: 
 
                 try:
                     policy_obs = to_policy_obs(
-                        obs, episode.task, cfg.image_input.width, cfg.image_input.height, camera_names
+                        obs, episode.prompt, cfg.image_input.width, cfg.image_input.height, camera_names
                     )
                 except CameraFailure:
                     logger.exception("Camera failure")
                     episode.end_reason = "camera_failure"
                     break
 
-                writers["agent_view"].add(agent_view(policy_obs, camera_names))
+                writers["agent_view"].add(
+                    agent_view(policy_obs, camera_names, episode.points, cfg.point_conditioning.camera)
+                )
                 if cfg.recording.camera_videos:
                     for name, frame in camera_frames(obs).items():
                         writers[name].add(frame)
@@ -110,7 +116,7 @@ def run_episode(env, client: PolicyClient, obs: dict, cfg: DictConfig, episode: 
                     break
                 infer_ms = (time.monotonic() - infer_start) * 1000
 
-                rcs_action = to_rcs_action(action)
+                rcs_action = to_rcs_action(action, cfg.robot.gripper.fixed_command)
                 episode.record(
                     t=step_start - start,
                     qpos_arm=policy_obs["qpos"]["arm"],
@@ -206,11 +212,14 @@ def log_to_wandb(cfg: DictConfig, identity: dict, client: dict, episode: Episode
             "robot": OmegaConf.to_container(cfg.robot, resolve=True),
             "image_input": OmegaConf.to_container(cfg.image_input, resolve=True),
             "episode": OmegaConf.to_container(cfg.episode, resolve=True),
+            "point_conditioning": OmegaConf.to_container(cfg.point_conditioning, resolve=True),
             "client": client,
         },
     )
-    videos = {f"video/{name}": wandb.Video(str(path), format="mp4") for name, path in episode.videos.items()}
-    run.log({**info, **videos})
+    media = {f"video/{name}": wandb.Video(str(path), format="mp4") for name, path in episode.videos.items()}
+    if (selection := episode.out_dir / "point_selection.png").exists():
+        media["point_selection"] = wandb.Image(str(selection), caption=episode.prompt)
+    run.log({**info, **media})
     run.summary.update(info)
     run.save(str(episode.out_dir / "trajectory.npz"), base_path=str(episode.out_dir), policy="now")
     run.finish()
@@ -222,7 +231,10 @@ def main(cfg: DictConfig):
         raise ValueError(f"Missing config values: {sorted(missing)}")
     print(OmegaConf.to_yaml(cfg))
 
-    episode = Episode(task=cfg.task, out_dir=Path(HydraConfig.get().runtime.output_dir))
+    pcfg = cfg.point_conditioning
+    if pcfg.enabled and pcfg.camera not in cfg.robot.cameras:
+        raise ValueError(f"point_conditioning.camera {pcfg.camera!r} is not one of robot.cameras")
+    episode = Episode(task=cfg.task, prompt=cfg.task, out_dir=Path(HydraConfig.get().runtime.output_dir))
     client = client_info()
 
     # Connect to the policy first so a missing server fails before the robot is touched.
@@ -240,7 +252,16 @@ def main(cfg: DictConfig):
         env = make_env(cfg)
         try:
             input("Press Enter to move home (opens the gripper)...")
-            env.reset()
+            obs, _ = env.reset()
+            if pcfg.enabled:
+                print(f"Click {list(pcfg.labels)} on {pcfg.camera} in the window, then press Enter there.")
+                frame = camera_frames(obs)[pcfg.camera]
+                episode.points = select_points(frame, list(pcfg.labels), window=f"{pcfg.camera}: select points")
+                imageio.imwrite(episode.out_dir / "point_selection.png", draw_points(frame, episode.points))
+                if pcfg.append_to_prompt:
+                    episode.prompt = format_point_prompt(cfg.task, episode.points)
+                print(f"Points: { {k: (round(x, 3), round(y, 3)) for k, (x, y) in episode.points.items()} }")
+            print(f"Prompt sent to the policy: {episode.prompt!r}")
             input("Press Enter to start (Ctrl+C ends the episode)...")
             # Already home, so this barely moves; it gives a fresh first observation after the prompt.
             obs, _ = env.reset()
@@ -251,6 +272,8 @@ def main(cfg: DictConfig):
             # Record the outcome before shutting down the robot and cameras, so a crash in RCS's native
             # shutdown code can't lose it. The arm holds its last commanded pose meanwhile.
             info = summarize(episode, cfg.robot.control_hz)
+            info["prompt"] = episode.prompt
+            info["points"] = {k: list(v) for k, v in episode.points.items()}
             info["success"] = prompt_success()
             info_path.write_text(json.dumps({"policy": identity, **info}, indent=2, default=str))
             print(f"Saved episode to {episode.out_dir}")

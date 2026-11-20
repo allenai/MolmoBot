@@ -127,9 +127,23 @@ def to_policy_obs(obs: dict, task: str, image_width: int, image_height: int, cam
     return policy_obs
 
 
-def to_rcs_action(action: dict) -> dict:
-    """MolmoBot server action -> RCS action. Gripper: server 0 = open, 255 = closed."""
-    gripper_open = 1.0 - float(np.asarray(action["gripper"]).reshape(-1)[0]) / 255.0
+def to_rcs_action(action: dict, fixed_gripper: str | None = None) -> dict:
+    """MolmoBot server action -> RCS action. Gripper: server 0 = open, 255 = closed.
+
+    fixed_gripper ("open"/"closed") overrides the gripper for arm-only policies, which return no gripper action.
+    """
+    if fixed_gripper is not None:
+        if fixed_gripper not in ("open", "closed"):
+            raise ValueError(f"robot.gripper.fixed_command must be null, 'open' or 'closed', got {fixed_gripper!r}")
+        gripper_open = 1.0 if fixed_gripper == "open" else 0.0
+    else:
+        gripper = np.asarray(action.get("gripper", [])).reshape(-1)
+        if gripper.size == 0:
+            raise ValueError(
+                "The policy returned no gripper action (arm-only policy). "
+                "Set robot.gripper.fixed_command to 'open' or 'closed'."
+            )
+        gripper_open = 1.0 - float(gripper[0]) / 255.0
     return {
         "joints": np.asarray(action["arm"][:7], dtype=np.float64),
         "gripper": np.array([gripper_open], dtype=np.float32),

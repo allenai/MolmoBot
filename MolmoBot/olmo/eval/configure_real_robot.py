@@ -4,7 +4,6 @@ from molmo_spaces.configs.abstract_exp_config import MlSpacesExpConfig
 from molmo_spaces.configs.robot_configs import FrankaRobotConfig
 from molmo_spaces.configs.policy_configs import BasePolicyConfig
 from molmo_spaces.policy.base_policy import InferencePolicy
-from molmo_spaces.evaluation.configs.evaluation_configs import JsonBenchmarkEvalConfig
 
 
 
@@ -43,6 +42,13 @@ class RealRobotVLAPolicy(InferencePolicy):
         self.gripper_representation_count = 2
 
         self.prepare_model()
+
+        # Arm-only models (action_dim == arm dims, e.g. push policies trained with the gripper held closed):
+        # drop the gripper from both the state sent to the model and the returned action, so the state
+        # matches the checkpoint's normalization stats.
+        model_action_dim = getattr(self.agent.model_config, "action_dim", None)
+        if model_action_dim == self.action_spec["arm"] and "gripper" in self.action_move_group_names:
+            self.action_move_group_names = [g for g in self.action_move_group_names if g != "gripper"]
 
         self.obs_history: list[dict] = []
         # Default obs is 1 and delta is 8

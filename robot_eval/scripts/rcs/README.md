@@ -63,6 +63,24 @@ One episode per run, like [the polymetis client](../droid/run_policy.py):
 Ctrl+C is not an emergency stop: the arm finishes moving toward its last target. Use the stop button for anything
 unsafe.
 
+## Point-conditioned policies
+
+For policies trained with `use_point_prompts=True`, set `point_conditioning.enabled=true`. After moving home, a
+window shows the `point_conditioning.camera` frame. Click one point per entry in `point_conditioning.labels`, then
+press Enter (`r` restarts, Esc aborts). The points are appended to the task exactly as in training
+(`SynthmanipDataset._format_point_prompt`), e.g. `task <points coords="1 1 423 512">pickup_obj</points>`, with
+0-1000 coordinates normalized to that camera's image. Labels must match the object names used in training.
+
+`point_conditioning.append_to_prompt=false` keeps the GUI, the video dot and the logging but sends the task unchanged,
+for trying the workflow with a policy that wasn't trained on points.
+
+Logged in addition: the points drawn on the point camera's panel of `video/agent_view`, `point_selection` (the frame
+you clicked on, full resolution), and `prompt` / `points` in the run summary.
+
+Training with `use_point_prompts=True` also appends the point camera's frame at the time the points were taken (the
+conditioning image) as an extra model input. `serve_molmo.py` / `RealRobotVLAPolicy` don't do this yet, so the
+server needs that support before a point-trained policy gets the inputs it was trained with.
+
 ## What gets logged
 
 Each episode is one W&B run in `wandb.project`:
