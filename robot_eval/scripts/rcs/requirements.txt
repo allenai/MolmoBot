@@ -1,0 +1,5 @@
+# Install into the RCS venv (which already has rcs, rcs_fr3, rcs_robotiq2f85, rcs_zed and pyzed).
+hydra-core
+wandb
+msgpack-numpy
+imageio[ffmpeg]

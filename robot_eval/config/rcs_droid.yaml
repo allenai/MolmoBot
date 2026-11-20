@@ -1,0 +1,62 @@
+# Config for scripts/rcs/run_policy.py: MolmoBot eval on a DROID setup (FR3 + Robotiq 2F-85 + ZED)
+# driven directly from this workstation through Robot Control Stack (no NUC / polymetis).
+
+task: ???
+
+robot:
+  ip: 192.168.1.12              # FR3 control box IP (FCI)
+  ignore_realtime: true         # true unless this machine runs a PREEMPT_RT kernel
+  control_hz: 15                # policy step rate; also sizes the RCS joint interpolation window
+  home_speed_factor: 0.2        # fraction of max speed used when moving home
+  home_jointpos: [0.0, -0.7, 0.0, -2.35619, 0.0, 1.57079, 0.0]
+  max_joint_delta_per_step: 0.2 # rad, client-side clamp on top of the server's own clamp
+
+  # Joint impedance controller (tau = kp * (q_des - q) - kd * dq, gravity compensated by the Franka).
+  # Stiffer than RCS's FR3 defaults (kp 100/75/150/50, kd 20/7.5/15/5), which sagged on real rollouts.
+  kp: [600.0, 600.0, 600.0, 600.0, 250.0, 150.0, 50.0]   # Nm/rad
+  kd: [50.0, 50.0, 50.0, 50.0, 30.0, 25.0, 15.0]         # Nm*s/rad
+  # Nm, per-joint clamp on the commanded torque (gravity comp is added on top by the Franka).
+  # Conservative starting point; raise in stages toward the hardware max [87]*4 + [12]*3 if tracking lags.
+  effort_limit: [5.0, 5.0, 5.0, 5.0, 5.0, 5.0, 5.0]
+  # RCS's default collision thresholds (10-20 Nm / 10-20 N) trip a cartesian_reflex on normal grasp contact.
+  # true raises them to 100 Nm / 100 N; effort_limit then bounds how hard the controller can push.
+  allow_high_collision: true
+
+  gripper:
+    serial: DAANTG8W            # python -m rcs_robotiq2f85 serials
+    speed: 85                   # mm/s, 20-150
+    force: 20                   # N, 20-235
+
+  cameras:                      # names must match the policy's camera_names
+    wrist_camera: 14943057      # ZED Mini serial (python -m rcs_zed serials)
+    exo_camera_1: 35115330      # ZED 2/2i serial
+  camera_width: 1280
+  camera_height: 720
+  camera_fps: 30
+
+image_input:                    # resolution sent to the policy
+  width: 640
+  height: 360
+
+policy:
+  host: localhost
+  port: 8000
+  name: null                    # optional label; defaults to the HF repo / S3 / checkpoint dir name
+  checkpoint_path: null         # override if the server's local_path isn't relative to MolmoBot/MolmoBot
+
+episode:
+  max_duration_s: 60            # episode ends at this limit, or earlier on Ctrl+C
+
+recording:
+  camera_videos: false          # also save full-resolution camera videos (agent view is always saved)
+
+wandb:
+  enabled: true
+  entity: null
+  project: molmobot-real-eval
+  eval_name: null               # optional label for a batch of rollouts, e.g. "kitchen_v1"
+  tags: []
+
+hydra:
+  run:
+    dir: outputs/rcs/${now:%Y-%m-%d}/${now:%H-%M-%S}
