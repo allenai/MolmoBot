@@ -959,6 +959,8 @@ class LayerNormBase(nn.Module):
         # See https://github.com/pytorch/pytorch/issues/110966.
         if tensor.device.type == "cuda" and torch.is_autocast_enabled():
             return tensor.to(dtype=dtype if dtype is not None else torch.get_autocast_gpu_dtype())
+        elif tensor.device.type == "xpu" and torch.is_autocast_enabled("xpu"):
+            return tensor.to(dtype=dtype if dtype is not None else torch.get_autocast_dtype("xpu"))
         elif tensor.device.type == "cpu" and torch.is_autocast_cpu_enabled():
             return tensor.to(dtype=dtype if dtype is not None else torch.get_autocast_cpu_dtype())
         else:
@@ -1641,6 +1643,8 @@ class OLMoBlock(nn.Module):
         # See https://github.com/pytorch/pytorch/issues/110966.
         if bias.device.type == "cuda" and torch.is_autocast_enabled():
             target_dtype = torch.get_autocast_gpu_dtype()
+        elif bias.device.type == "xpu" and torch.is_autocast_enabled("xpu"):
+            target_dtype = torch.get_autocast_dtype("xpu")
         elif bias.device.type == "cpu" and torch.is_autocast_cpu_enabled():
             target_dtype = torch.get_autocast_cpu_dtype()
         if bias.dtype != target_dtype:

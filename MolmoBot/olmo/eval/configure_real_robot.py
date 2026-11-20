@@ -6,6 +6,8 @@ from molmo_spaces.configs.policy_configs import BasePolicyConfig
 from molmo_spaces.policy.base_policy import InferencePolicy
 from molmo_spaces.evaluation.configs.evaluation_configs import JsonBenchmarkEvalConfig
 
+from olmo.device_util import default_device_type
+
 
 
 class RealRobotVLAPolicy(InferencePolicy):
@@ -202,7 +204,7 @@ class RealRobotVLAPolicyConfig(BasePolicyConfig):
     policy_type: str = "learned"
     action_type: str = "joint_pos_rel"
     policy_cls: type = None  # Set in model_post_init to avoid circular imports
-    device: str | None = "cuda" if torch.cuda.is_available() else "cpu"
+    device: str | None = default_device_type()
 
     # Set to your checkpoint path (local dir or use --hf_repo with serve scripts)
     checkpoint_path: str = ""

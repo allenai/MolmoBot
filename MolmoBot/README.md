@@ -42,6 +42,23 @@ cd <code_path>/MolmoBot/MolmoBot
 python launch_scripts/serve_molmo.py --hf-repo allenai/MolmoBot-DROID
 ```
 
+### How to run the same on Intel's XPU
+
+The policy picks the device on its own (XPU first, then CUDA, then CPU). Install the XPU build of PyTorch instead of the CUDA one that `uv sync` selects, and then the remaining packages:
+
+```bash
+pip install torch torchvision --index-url https://download.pytorch.org/whl/xpu
+pip install absl-py cached_property fiddle omegaconf==2.3.0 rich boto3 google-cloud-storage tokenizers "cached_path>=1.6.4" "transformers<5" "datasets<4" huggingface_hub sentencepiece einops einops-exts tqdm accelerate imageio av torchmetrics editdistance scikit-learn msgspec decord
+```
+
+Then run the same command as above, pinning the card with `ZE_AFFINITY_MASK` where `CUDA_VISIBLE_DEVICES` would be used:
+
+```bash
+ZE_AFFINITY_MASK=0 PYTHONPATH=. python launch_scripts/serve_molmo.py --hf-repo allenai/MolmoBot-DROID
+```
+
+The server also needs the packages of the `eval` extra (`molmo_spaces`, `websockets`, `msgpack_numpy`, `hydra-core`). The checkpoint runs with PyTorch SDPA attention, so `flash-attn` is not needed.
+
 ## Demo notebook
 
 Try playing around with MolmoBot-DROID! Use this [demo notebook](demo_policy.ipynb) to create a scene, load a policy, and roll out an episode.

@@ -37,6 +37,8 @@ import numpy as np
 import torch
 from PIL import Image
 
+from olmo.device_util import resolve_device
+
 log = logging.getLogger(__name__)
 
 
@@ -51,7 +53,7 @@ class SynthManipMolmoInferenceWrapper:
     def __init__(
         self,
         checkpoint_path: str,
-        device: str = "cuda",
+        device: Optional[str] = None,
         num_flow_steps: Optional[int] = None,
         max_seq_len: Optional[int] = None,
         norm_repo_id: str = "synthmanip",
@@ -64,14 +66,14 @@ class SynthManipMolmoInferenceWrapper:
 
         Args:
             checkpoint_path: Path to the model checkpoint directory.
-            device: Device to run inference on ("cuda" or "cpu").
+            device: Device to run inference on ("xpu", "cuda" or "cpu"). None detects XPU, then CUDA, then CPU.
             num_flow_steps: Number of flow-matching integration steps. 
                            Uses checkpoint default if None.
             max_seq_len: Maximum sequence length. Uses checkpoint default if None.
             norm_repo_id: Repository ID for normalization stats lookup.
         """
         self.checkpoint_path = checkpoint_path
-        self.device = torch.device(device if torch.cuda.is_available() else "cpu")
+        self.device = resolve_device(device)
         self.num_flow_steps = num_flow_steps
         self.norm_repo_id = norm_repo_id
         self.use_bfloat16 = use_bfloat16
@@ -324,7 +326,8 @@ class SynthManipMolmoInferenceWrapper:
         # Generate actions
         with torch.no_grad():
             if self.use_bfloat16:
-                with torch.autocast(device_type='cuda', dtype=torch.bfloat16):
+                with torch.autocast(device_type=self.device.type, dtype=torch.bfloat16,
+                                    enabled=self.device.type != "cpu"):
                     actions = self.model.generate_actions(
                         **model_inputs,
                         num_steps=self.num_flow_steps,
@@ -364,7 +367,7 @@ def test_agent(
     image_paths: Optional[List[str]] = None,
     task_description: str = "complete the task",
     state: Optional[List[float]] = None,
-    device: str = "cuda",
+    device: Optional[str] = None,
 ) -> np.ndarray:
     """
     Test the agent with provided inputs or synthetic data.
