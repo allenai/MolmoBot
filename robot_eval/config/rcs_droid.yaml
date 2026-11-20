@@ -25,7 +25,7 @@ robot:
   gripper:
     serial: DAANTG8W            # python -m rcs_robotiq2f85 serials
     speed: 85                   # mm/s, 20-150
-    force: 20                   # N, 20-235
+    force: 100                  # N, 20-235. 20 is the gripper's minimum: it stops at first contact and barely squeezes
 
   cameras:                      # names must match the policy's camera_names
     wrist_camera: 14943057      # ZED Mini serial (python -m rcs_zed serials)
