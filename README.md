@@ -78,13 +78,11 @@ python calculate_stats.py RBY1PickAndPlaceDataGenConfig/part0/train --keys actio
 # BibTeX
 
 ```
-@misc{deshpande2026molmobot,
-      title={MolmoB0T: Large-Scale Simulation Enables Zero-Shot Manipulation},
-      author={Abhay Deshpande and Maya Guru and Rose Hendrix and Snehal Jauhri and Ainaz Eftekhar and Rohun Tripathi and Max Argus and Jordi Salvador and Haoquan Fang and Matthew Wallingford and Wilbert Pumacay and Yejin Kim and Quinn Pfeifer and Ying-Chun Lee and Piper Wolters and Omar Rayyan and Mingtong Zhang and Jiafei Duan and Karen Farley and Winson Han and Eli Vanderbilt and Dieter Fox and Ali Farhadi and Georgia Chalvatzaki and Dhruv Shah and Ranjay Krishna},
-      year={2026},
-      eprint={2603.16861},
-      archivePrefix={arXiv},
-      primaryClass={cs.RO},
-      url={https://arxiv.org/abs/2603.16861},
+@inproceedings{deshpande2026molmobot,
+    title={MolmoB0T: Large-Scale Simulation Enables Zero-Shot Manipulation},
+    author={Abhay Deshpande and Maya Guru and Rose Hendrix and Snehal Jauhri and Ainaz Eftekhar and Rohun Tripathi and Max Argus and Jordi Salvador and Haoquan Fang and Matthew Wallingford and Wilbert Pumacay and Yejin Kim and Quinn Pfeifer and Ying-Chun Lee and Piper Wolters and Omar Rayyan and Mingtong Zhang and Jiafei Duan and Karen Farley and Winson Han and Eli Vanderbilt and Dieter Fox and Ali Farhadi and Georgia Chalvatzaki and Dhruv Shah and Ranjay Krishna},
+    booktitle={10th Annual Conference on Robot Learning},
+    year={2026},
+    url={https://openreview.net/forum?id=c4Z0Y8gvnI}
 }
 ```
