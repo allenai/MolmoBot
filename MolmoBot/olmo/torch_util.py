@@ -11,6 +11,8 @@ import torch.distributed as dist
 from torch import nn
 from torch.distributed.tensor import DTensor
 
+from olmo.device_util import is_available
+
 T = TypeVar("T")
 OLMO_NUM_NODES_ENV_VAR = "NUM_NODES"
 
@@ -159,6 +161,8 @@ def ensure_finite_(x: torch.Tensor, check_neg_inf: bool = True, check_pos_inf: b
 def get_default_device() -> torch.device:
     if torch.cuda.is_available() and torch.cuda.is_initialized():
         return torch.device("cuda")
+    elif is_available("xpu") and torch.xpu.is_initialized():
+        return torch.device("xpu")
     else:
         return torch.device("cpu")
 
